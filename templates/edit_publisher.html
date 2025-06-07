@@ -1,0 +1,21 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Редактировать издательство{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <h2><i class="fas fa-edit"></i> Редактировать издательство</h2>
+    <form method="POST" action="{{ url_for('edit_publisher', publisher_id=publisher.id) }}">
+        <div class="form-group">
+            <label for="name">Название *</label>
+            <input type="text" id="name" name="name" value="{{ publisher.name }}" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save"></i> Сохранить
+            </button>
+            <a href="{{ url_for('show_publishers') }}" class="btn btn-cancel">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

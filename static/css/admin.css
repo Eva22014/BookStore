@@ -1,0 +1,834 @@
+:root {
+    --header-bg: #9747FF;
+    --text-light: #FFFFFF;
+    --accent-color: #9747FF;
+    --bg-dark: #FFFFFF;
+    --card-bg: #1C1C1C;
+    --border-color: #333;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: #ccc;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    background-color: var(--header-bg);
+    color: var(--text-light);
+    height: 78px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1000;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 30%;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    width: 40%;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    width: 30%;
+}
+
+.header-tab {
+    cursor: pointer;
+    padding: 8px 15px;
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.header-tab.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.header-tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--header-bg);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    top: 100%;
+    left: 0;
+}
+
+.dropdown-content a {
+    color: var(--text-light);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.dropdown-content a:hover {
+    background-color: #7A3ECC;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-container input {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px 0 0 20px;
+    width: 100%;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-container button {
+    background: #7A3ECC;
+    border: none;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+    color: var(--text-light);
+    padding: 8px 15px;
+    transition: background-color 0.2s;
+}
+
+.search-container button:hover {
+    background: #6a3ebc;
+}
+
+.profile-icon img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: border-color 0.2s;
+}
+
+.profile-icon img:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-container {
+    padding: 20px;
+    min-height: calc(100vh - 78px);
+    background-color: var(--bg-dark);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .header-left, .header-center, .header-right {
+        width: auto;
+        flex: 1;
+    }
+
+    .header-tab {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px;
+    }
+
+    .header-left, .header-center, .header-right {
+        width: 100%;
+        justify-content: center;
+        padding: 5px 0;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+    }
+}
+
+/* Основные стили для страницы учётных записей */
+.accounts-container {
+    padding: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.accounts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.accounts-header h1 {
+    color: #7B2CBF;
+    font-size: 28px;
+    margin: 0;
+}
+
+.accounts-header h1 i {
+    margin-right: 10px;
+}
+
+.add-user-btn {
+    background-color: #7B2CBF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-user-btn:hover {
+    background-color: #9D4EDD;
+    transform: translateY(-2px);
+}
+
+.user-list {
+    display: grid;
+    gap: 20px;
+}
+
+.user-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+    border-left: 4px solid;
+}
+
+.user-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.user-card.active {
+    border-left-color: #4CAF50;
+}
+
+.user-card.inactive {
+    border-left-color: #F44336;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.user-info p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.user-info p i {
+    width: 20px;
+    color: #7B2CBF;
+}
+
+.user-status {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-status.active {
+    background-color: #E8F5E9;
+    color: #4CAF50;
+}
+
+.user-status.inactive {
+    background-color: #FFEBEE;
+    color: #F44336;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.edit-btn {
+    color: #2196F3;
+}
+
+.edit-btn:hover {
+    background-color: #E3F2FD;
+}
+
+.delete-btn {
+    color: #F44336;
+}
+
+.delete-btn:hover {
+    background-color: #FFEBEE;
+}
+
+.backup-section {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.backup-btn {
+    background-color: #673AB7;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.backup-btn:hover {
+    background-color: #7E57C2;
+    transform: translateY(-2px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .user-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-status {
+        margin: 10px 0;
+        align-self: flex-start;
+    }
+
+    .user-actions {
+        align-self: flex-end;
+    }
+}
+
+/* ===== ДОБАВЛЯЕМ ЭТО В КОНЕЦ ФАЙЛА ===== */
+
+/* Стили для страницы учётных записей */
+.accounts-container {
+    padding: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.accounts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.accounts-header h1 {
+    color: #7B2CBF;
+    font-size: 28px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-list {
+    display: grid;
+    gap: 20px;
+}
+
+.user-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.user-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.user-info h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.user-info h3 a:hover {
+    color: #7B2CBF;
+}
+
+.user-info p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-info i {
+    color: #7B2CBF;
+    width: 20px;
+}
+
+.user-status {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 20px;
+    background-color: #E8F5E9;
+    color: #4CAF50;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Стили для детальной страницы сотрудника */
+.employee-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.back-link {
+    margin-bottom: 20px;
+}
+
+.back-link a {
+    color: #7B2CBF;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+.employee-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.employee-info {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.info-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #555;
+    width: 180px;
+}
+
+.info-value {
+    color: #333;
+}
+
+.employee-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .user-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-status {
+        margin: 10px 0;
+        align-self: flex-start;
+    }
+
+    .user-actions {
+        align-self: flex-end;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-label {
+        width: 100%;
+    }
+}
+
+
+
+.employee-detail-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.employee-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: black;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 15px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 150px;
+    color: #555;
+}
+
+.info-value {
+    flex: 1;
+}
+
+.employee-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    width: 120px;
+    background: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.action-btn:hover {
+    background: #3a5a8f;
+}
+
+.block-btn {
+    background-color: #fff;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.block-btn i {
+    color: #ffc107; /* Желтый цвет иконки */
+}
+
+.block-btn:hover i {
+    transform: scale(1.2);
+}
+
+.block-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.5);
+    border-radius: 4px;
+}
+
+.employee-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-card:hover .user-actions {
+    opacity: 1;
+}
+
+.edit-btn, .delete-btn, .block-btn {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.edit-btn i { color: #28a745; }
+.delete-btn i { color: #dc3545; }
+.block-btn i { color: #ffc107; }
+
+.edit-btn:hover i,
+.delete-btn:hover i,
+.block-btn:hover i {
+    transform: scale(1.2);
+}
+
+
+/* === Цвет текста для всей страницы === */
+body,
+.publishers-container,
+.publishers-table th,
+.publishers-table td,
+.form-group label {
+    color: #000 !important; /* Чёрный текст */
+}
+/* Таблица издательств */
+.publishers-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.publishers-table th, .publishers-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+.publishers-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+.publishers-table tr:hover {
+    background-color: #f5f5f5;
+}
+.actions {
+    white-space: nowrap;
+}
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+/* === Фиолетовая кнопка "Добавить" === */
+.btn-add {
+    background-color: #673ab7; /* фиолетовый */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #512da8; /* темнее фиолетовый */
+}
+
+.btn-edit { background-color: #ffc107; color: black; }
+.btn-delete { background-color: #dc3545; color: white; }
+.btn-save { background-color: #007bff; color: white; }
+.btn:hover { opacity: 0.9; }
+
+/* Формы */
+.form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.form-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+/* === Центрирование содержимого таблицы === */
+.publishers-table th,
+.publishers-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+/* === Уменьшение горизонтальных отступов в таблице для компактности === */
+.publishers-table td,
+.publishers-table th {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.header-with-button {
+    display: flex;
+    align-items: center;         /* Выравнивание по вертикали */
+    justify-content: space-between; /* Распределение элементов */
+    margin-bottom: 20px;
+    flex-wrap: wrap;             /* Для адаптивности на маленьких экранах */
+}
+
+.header-with-button h2 {
+    margin-right: 20px;          /* Отступ между заголовком и кнопкой */
+    font-size: 24px;
+    color: #333;
+}
+
+.btn-add {
+    background-color: #673ab7;   /* Фиолетовый */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #512da8;   /* Темнее фиолетовый */
+}
+
+/* Только необходимые изменения для кнопки */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    margin-top: 20px;
+}
+
+.header-actions h2 {
+    margin-left: 750px;
+    font-size: 24px;
+    color: #333;
+}
+
