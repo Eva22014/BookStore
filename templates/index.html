@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книжный магазин</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sansation+Light&display=swap" rel="stylesheet">
+    <style>
+        /* Общие стили */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        /* Стили для шапки */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 78px;
+            background: #9747FF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            padding: 0 60px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 24px;
+            position: absolute;
+            left: 60px;
+            top: 24px;
+            bottom: 24px;
+        }
+
+        .chip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 136px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chip.light {
+            background: #FFFFFF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.light .label {
+            color: #9747FF;
+        }
+
+        .chip.dark {
+            background: #9747FF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.dark .label {
+            color: #FFFFFF;
+        }
+
+        .label {
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .search-bar {
+            position: absolute;
+            left: 377px;
+            right: 324px;
+            top: 19px;
+            height: 49px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field {
+            width: 739px;
+            height: 38px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field input {
+            flex: 1;
+            height: 36px;
+            padding: 6px 12px;
+            border: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            color: #596169;
+            opacity: 0.7;
+        }
+
+        .input-field input:focus {
+            outline: none;
+        }
+
+        .icons {
+            display: flex;
+            gap: 17px;
+            position: absolute;
+            right: 22.92px;
+            top: calc(50% - 39.43px/2 - 0.29px);
+        }
+
+        .icon {
+            width: 47.08px;
+            height: 39.43px;
+            background: #FFFFFF;
+            border: 1px solid #FFFFFF;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Основной контейнер для контента */
+        .container {
+            display: flex;
+            padding: 30px 50px;
+            gap: 60px;
+            position: absolute;
+            height: 908px;
+            left: 0;
+            right: 0;
+            top: 157px;
+            background: #FFFFFF;
+        }
+
+        /* Контейнер для списка книг (слева) */
+        .book-container {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            margin-right: 405px; /* Отступ справа для предотвращения наложения на боковую панель */
+        }
+
+        .book-container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #000000;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+            gap: 60px;
+        }
+
+        .book-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .book-item img {
+            width: 140px;
+            height: 200px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        .book-item .book-title {
+            width: 180px;
+            height: auto;
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 24px;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .book-item .price {
+            width: auto;
+            height: 24px;
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 20px;
+            line-height: 24px;
+            color: #DB4444;
+            margin-bottom: 8px;
+        }
+
+        .book-item .out-of-stock {
+            width: 135px;
+            height: 24px;
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            color: rgba(0, 0, 0, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .book-item .add-to-cart {
+            width: 185px;
+            height: 41px;
+            background: #9747FF;
+            border-radius: 4px;
+            border: none;
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 18px;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .book-item .add-to-cart:disabled {
+            background: #808080;
+            cursor: not-allowed;
+        }
+
+        .book-item .add-to-cart:hover:not(:disabled) {
+            background: #7a39d5;
+        }
+
+        /* Боковая панель с фильтрами (справа) */
+        .sidebar {
+            flex: 1;
+            min-width: 355px;
+            position: absolute;
+            right: 50px;
+            top: 0;
+        }
+
+        .filter-section {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 355px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section h2 {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 20px;
+            color: #000;
+            margin: 0;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .filter-section h2 span {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .filter-section .filter-list {
+            list-style: none;
+            padding: 10px 15px;
+            margin: 0;
+            display: none;
+        }
+
+        .filter-section.active .filter-list {
+            display: block;
+        }
+
+        .filter-list li {
+            margin-bottom: 8px;
+        }
+
+        .filter-list label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            color: #212529;
+        }
+
+        .filter-list input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 1px solid #666;
+            border-radius: 3px;
+            cursor: pointer;
+            appearance: none;
+            position: relative;
+        }
+
+        .filter-list input[type="checkbox"]:checked::after {
+            content: '✔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: #9747FF;
+        }
+
+        .filter-section .show-all {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
+            color: #9747FF;
+            text-align: right;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        /* Стили для фильтра по цене */
+        .price-section {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 353px;
+            margin-bottom: 10px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .price-section h2 {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 20px;
+            color: #000;
+            margin: 0;
+            padding: 10px 15px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .price-slider {
+            position: relative;
+            width: 323px;
+            height: 40px;
+            margin: 10px auto;
+            padding: 0 15px;
+        }
+
+        .price-slider .track {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .price-slider .range {
+            position: absolute;
+            height: 6px;
+            background: #9747FF;
+            border-radius: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .price-slider .thumb {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #9747FF;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+
+        .price-slider .thumb.start {
+            left: 10%;
+        }
+
+        .price-slider .thumb.end {
+            right: 10%;
+        }
+
+        .price-slider .labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 17px;
+            color: #000;
+            margin-top: 10px;
+        }
+
+        .price-section .apply-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 353px;
+            height: 48px;
+            background: #9747FF;
+            border-radius: 0 0 5px 5px;
+            margin-top: 0;
+        }
+
+        .price-section .apply-button span {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 19px;
+            color: #FFFFFF;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+                gap: 30px;
+            }
+
+            .book-container {
+                width: 100%;
+                margin-right: 0; /* Убираем отступ на малых экранах */
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                min-width: 0;
+            }
+
+            .filter-section, .price-section {
+                width: 100%;
+            }
+
+            .book-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 30px;
+            }
+
+            .book-item img {
+                width: 120px;
+                height: 170px;
+            }
+
+            .book-item .book-title {
+                width: 150px;
+                font-size: 14px;
+            }
+
+            .book-item .price, .book-item .out-of-stock {
+                font-size: 16px;
+            }
+
+            .book-item .add-to-cart {
+                width: 150px;
+                height: 35px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .book-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 0 20px;
+            }
+
+            .nav {
+                left: 20px;
+            }
+
+            .search-bar {
+                left: 200px;
+                right: 200px;
+            }
+
+            .icons {
+                right: 20px;
+            }
+
+            .book-item img {
+                width: 100px;
+                height: 140px;
+            }
+
+            .book-item .book-title {
+                width: 120px;
+                font-size: 12px;
+            }
+
+            .book-item .price, .book-item .out-of-stock {
+                font-size: 14px;
+            }
+
+            .book-item .add-to-cart {
+                width: 120px;
+                height: 30px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка страницы -->
+    <div class="header">
+        <div class="nav">
+            <div class="chip light">
+                <a href="/" class="label">Книги</a>
+            </div>
+            <div class="chip dark">
+                <a href="/shelf" class="label">Стеллажи</a>
+            </div>
+        </div>
+        <div class="search-bar">
+            <div class="input-field">
+                <input type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <div class="icons">
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-fill" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2v2H.5a.5.5 0 0 1-.5-.5zM3 0H1a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V1a2 2 0 0 0-2-2H3zm6.5 1A.5.5 0 0 1 10 2H5a.5.5 0 0 1 0-1h5.5Zm3 .5v7h-1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5v-7a.5.5 0 0 1 .5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5Z"/>
+                </svg>
+            </div>
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 4 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Контейнер для списка книг (слева) -->
+        <div class="book-container">
+            <h1>ПОПУЛЯРНЫЕ</h1>
+            <div class="book-grid">
+                <div class="book-item" onclick="window.location.href='/book_info'">
+                    <img src="https://via.placeholder.com/140x200" alt="Евгений Онегин">
+                    <div class="book-title">Евгений Онегин</div>
+                    <div class="price">529 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Маленькие женщины">
+                    <div class="book-title">Маленькие женщины</div>
+                    <div class="price">1228 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Алиса в стране чудес">
+                    <div class="book-title">Приключения Алисы в стране чудес</div>
+                    <div class="price">1300 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Альберт Эйнштейн">
+                    <div class="book-title">Альберт Эйнштейн и его теория относительности</div>
+                    <div class="out-of-stock">НЕТ В НАЛИЧИИ</div>
+                    <button class="add-to-cart" disabled>В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Евгений Онегин">
+                    <div class="book-title">Евгений Онегин</div>
+                    <div class="price">2424 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Пираты">
+                    <div class="book-title">Пираты</div>
+                    <div class="price">1349 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Мефистофель">
+                    <div class="book-title">Мефистофель. История одной карьеры</div>
+                    <div class="price">622 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                <div class="book-item">
+                    <img src="https://via.placeholder.com/140x200" alt="Цветок яблони">
+                    <div class="book-title">Цветок яблони</div>
+                    <div class="price">507 р</div>
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+            </div>
+        </div>
+        <!-- Боковая панель с фильтрами (справа) -->
+        <div class="sidebar">
+            <div class="filter-section">
+                <h2>Авторы<span>Показать все</span></h2>
+                <ul class="filter-list">
+                    <li><label><input type="checkbox"> Островский</label></li>
+                    <li><label><input type="checkbox"> Пушкин</label></li>
+                    <li><label><input type="checkbox"> Дюма</label></li>
+                    <li><label><input type="checkbox"> Булгаков</label></li>
+                    <li><label><input type="checkbox"> Шукшин</label></li>
+                </ul>
+            </div>
+            <div class="filter-section">
+                <h2>Жанры<span>Показать все</span></h2>
+                <ul class="filter-list">
+                    <li><label><input type="checkbox"> Фантазия</label></li>
+                    <li><label><input type="checkbox"> Детектив</label></li>
+                    <li><label><input type="checkbox"> Биография</label></li>
+                    <li><label><input type="checkbox"> Ужасы</label></li>
+                    <li><label><input type="checkbox"> Роман</label></li>
+                </ul>
+            </div>
+            <div class="filter-section">
+                <h2>Издательства<span>Показать все</span></h2>
+                <ul class="filter-list">
+                    <li><label><input type="checkbox"> АСТ</label></li>
+                    <li><label><input type="checkbox"> Эксмо</label></li>
+                    <li><label><input type="checkbox"> Питер</label></li>
+                    <li><label><input type="checkbox"> Азбука</label></li>
+                    <li><label><input type="checkbox"> Росмен</label></li>
+                </ul>
+            </div>
+            <div class="filter-section">
+                <h2>Тематики<span>Показать все</span></h2>
+                <ul class="filter-list">
+                    <li><label><input type="checkbox"> Приключения</label></li>
+                    <li><label><input type="checkbox"> Тайны</label></li>
+                    <li><label><input type="checkbox"> Наука</label></li>
+                    <li><label><input type="checkbox"> Любовь</label></li>
+                    <li><label><input type="checkbox"> История</label></li>
+                </ul>
+            </div>
+            <div class="price-section">
+                <h2>Цена</h2>
+                <div class="price-slider">
+                    <div class="track"></div>
+                    <div class="range" style="left: 10%; right: 10%;"></div>
+                    <div class="thumb start" style="left: 10%;"></div>
+                    <div class="thumb end" style="right: 10%;"></div>
+                    <div class="labels">
+                        <span>50 р</span>
+                        <span>5799 р</span>
+                    </div>
+                </div>
+                <div class="apply-button">
+                    <span>Применить</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.filter-section h2').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

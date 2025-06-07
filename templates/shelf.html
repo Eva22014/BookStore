@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стеллажи</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sansation+Light&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 78px;
+            background: #9747FF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            padding: 0 60px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 24px;
+            position: absolute;
+            left: 60px;
+            top: 24px;
+            bottom: 24px;
+        }
+
+        .chip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 136px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chip.light {
+            background: #FFFFFF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.light .label {
+            color: #9747FF;
+        }
+
+        .chip.dark {
+            background: #9747FF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.dark .label {
+            color: #FFFFFF;
+        }
+
+        .label {
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .search-bar {
+            position: absolute;
+            left: 377px;
+            right: 324px;
+            top: 19px;
+            height: 49px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field {
+            width: 739px;
+            height: 38px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field input {
+            flex: 1;
+            height: 36px;
+            padding: 6px 12px;
+            border: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            color: #596169;
+            opacity: 0.7;
+        }
+
+        .input-field input:focus {
+            outline: none;
+        }
+
+        .icons {
+            display: flex;
+            gap: 17px;
+            position: absolute;
+            right: 22.92px;
+            top: calc(50% - 39.43px/2 - 0.29px);
+        }
+
+        .icon {
+            width: 47.08px;
+            height: 39.43px;
+            background: #FFFFFF;
+            border: 1px solid #FFFFFF;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            padding: 30px 50px;
+            position: absolute;
+            top: 157px;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+        }
+
+        .shelves-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .shelf-category {
+            margin-bottom: 20px;
+        }
+
+        .shelf-category h2 {
+            font-size: 18px;
+            color: #9747FF;
+            margin: 0 0 10px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .shelf-category h2::after {
+            content: '▼';
+            position: absolute;
+            right: 0;
+        }
+
+        .shelf-list {
+            display: none;
+            list-style: none;
+            padding: 0;
+        }
+
+        .shelf-list.active {
+            display: block;
+        }
+
+        .shelf-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .shelf-list li a {
+            text-decoration: none;
+            color: #212529;
+            font-size: 16px;
+        }
+
+        .add-shelf-btn {
+            background: #9747FF;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .add-shelf-btn:hover {
+            background: #7a39d5;
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                left: 200px;
+                right: 200px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .shelf-list li a {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-bar {
+                left: 100px;
+                right: 100px;
+            }
+
+            .shelf-list li a {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <div class="chip light">
+                <div class="label">Книги</div>
+            </div>
+            <div class="chip dark">
+                <div class="label">Стеллажи</div>
+            </div>
+        </div>
+        <div class="search-bar">
+            <div class="input-field">
+                <input type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <div class="icons">
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-fill" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2v2H.5a.5.5 0 0 1-.5-.5zM3 0H1a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V1a2 2 0 0 0-2-2H3zm6.5 1A.5.5 0 0 1 10 2H5a.5.5 0 0 1 0-1h5.5Zm3 .5v7h-1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5v-7a.5.5 0 0 1 .5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5Z"/>
+                </svg>
+            </div>
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 4 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="shelves-container">
+            <div class="shelf-category">
+                <h2>Любовь и отношения</h2>
+                <ul class="shelf-list">
+                    <li><a href="#">Стеллаж 1</a></li>
+                    <li><a href="#">Стеллаж 2</a></li>
+                </ul>
+            </div>
+            <div class="shelf-category">
+                <h2>Социальные отношения</h2>
+                <ul class="shelf-list">
+                    <li><a href="#">Стеллаж 1</a></li>
+                    <li><a href="#">Стеллаж 2</a></li>
+                    <li><a href="#">Стеллаж 3</a></li>
+                </ul>
+            </div>
+            <div class="shelf-category">
+                <h2>Приключения</h2>
+                <ul class="shelf-list">
+                    <li><a href="#">Стеллаж 1</a></li>
+                    <li><a href="#">Стеллаж 2</a></li>
+                    <li><a href="#">Стеллаж 3</a></li>
+                </ul>
+            </div>
+            <div class="shelf-category">
+                <h2>Виртуна</h2>
+                <ul class="shelf-list">
+                    <li><a href="#">Стеллаж 1</a></li>
+                </ul>
+            </div>
+            <div class="shelf-category">
+                <h2>Склад</h2>
+                <ul class="shelf-list">
+                    <li><a href="#">Стеллаж 1</a></li>
+                </ul>
+            </div>
+            <button class="add-shelf-btn">+ Стеллаж</button>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.shelf-category h2').forEach(header => {
+            header.addEventListener('click', () => {
+                const shelfList = header.nextElementSibling;
+                shelfList.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
