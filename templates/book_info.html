@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подробная информация о книге</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            position: absolute;
+            top: 157px;
+            left: 0;
+            right: 0;
+        }
+        .book-cover {
+            flex: 1;
+        }
+        .book-cover img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .book-details {
+            flex: 2;
+        }
+        .book-details h1 {
+            font-size: 24px;
+            margin: 0 0 10px;
+        }
+        .book-details p {
+            margin: 5px 0;
+        }
+        .book-details .price {
+            font-size: 20px;
+            color: #DB4444;
+            margin: 10px 0;
+        }
+        .book-details .add-to-cart {
+            background-color: #9747FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .book-details .add-to-cart:hover {
+            background-color: #7a39d5;
+        }
+        .description {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .description h2 {
+            font-size: 18px;
+            margin-top: 0;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+        }
+        .buttons button {
+            flex: 1;
+            background-color: #9747FF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .buttons button:hover {
+            background-color: #7a39d5;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+                gap: 30px;
+                top: 100px;
+            }
+
+            .buttons {
+                bottom: 10px;
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                top: 80px;
+            }
+
+            .book-cover img {
+                width: 100px;
+                height: 140px;
+            }
+
+            .book-details h1 {
+                font-size: 18px;
+            }
+
+            .book-details p {
+                font-size: 14px;
+            }
+
+            .book-details .price {
+                font-size: 16px;
+            }
+
+            .book-details .add-to-cart {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .description h2 {
+                font-size: 16px;
+            }
+
+            .description p {
+                font-size: 12px;
+            }
+
+            .buttons button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Подключаем хэдер из отдельного файла -->
+    {% include 'header.html' %}
+
+    <div class="container">
+        <div class="book-cover">
+            {% if book.image_url %}
+                <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
+            {% else %}
+                <img src="https://via.placeholder.com/200x300" alt="{{ book.title }}">
+            {% endif %}
+        </div>
+        <div class="book-details">
+            <h1>{{ book.title }}</h1>
+            <p><strong>ТЕМАТИКА:</strong> {{ book.theme }}</p>
+            <p><strong>АВТОР:</strong> {{ book.author }}</p>
+            <p><strong>ЖАНР:</strong> {{ book.genre }}</p>
+            <p><strong>КОЛ-ВО:</strong> {{ book.quantity }}</p>
+            <p><strong>ИЗДАТЕЛЬСТВО:</strong> {{ book.publisher }}</p>
+            <p class="price">Цена: {{ book.price }} руб.</p>
+            <button class="add-to-cart">Добавить в корзину</button>
+            <div class="description">
+                <h2>Описание</h2>
+                <p>{{ book.description }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="buttons">
+        <button>Списать книгу</button>
+        <button>Редактировать</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+/* Существующие стили остаются без изменений */
+.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 78px;
+    background: #9747FF;
+    border: 1px solid #000000;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    padding: 0 60px;
+}
+
+.nav {
+    display: flex;
+    gap: 24px;
+    position: absolute;
+    left: 60px;
+    top: 24px;
+    bottom: 24px;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 136px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.chip.light {
+    background: transparent;
+    border: 1px solid #9747FF;
+}
+
+
+.chip.light .label {
+    color: white;
+}
+
+.chip.dark {
+    background: #9747FF;
+    border: 1px solid #9747FF;
+}
+
+.chip.dark .label {
+    color: #FFFFFF;
+}
+
+.label {
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+    padding: 0 4px;
+    text-decoration: none; /* Убираем подчёркивание у ссылок */
+}
+
+.search-bar {
+    position: absolute;
+    left: 377px;
+    right: 324px;
+    top: 19px;
+    height: 49px;
+    display: flex;
+    align-items: center;
+}
+
+.input-field {
+    width: 739px;
+    height: 38px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.input-field input {
+    flex: 1;
+    height: 36px;
+    padding: 6px 12px;
+    border: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: #596169;
+    opacity: 0.7;
+}
+
+.input-field input:focus {
+    outline: none;
+}
+
+.icons {
+    display: flex;
+    gap: 17px;
+    position: absolute;
+    right: 22.92px;
+    top: calc(50% - 39.43px/2 - 0.29px);
+}
+
+.icon {
+    width: 47.08px;
+    height: 39.43px;
+    background: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Новый стиль для активной кнопки */
+.chip.active {
+    border: 1px solid #FFFFFF; /* Белая обводка для активной кнопки */
+}
+
+@media (max-width: 768px) {
+    .search-bar {
+        left: 200px;
+        right: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        left: 100px;
+        right: 100px;
+    }
+}
+
+.logout-button {
+    background-color: #673ab7; /* Цвет как у хэдера */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover,
+.logout-button:focus {
+    background-color: #512da8; /* Темнее фиолетовый при наведении */
+    text-decoration: none;
+}
+/* Стили для активной вкладки */
+.chip.active {
+    background-color: #FFFFFF !important;
+    border: 1px solid #FFFFFF !important;
+}
+
+.chip.active .label {
+    color: #9747FF !important;
+    font-weight: 700;
+}

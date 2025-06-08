@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sansation+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding-top: 78px; /* Отступ для фиксированного хэдера */
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .header {
+            position: fixed; /* Фиксированное позиционирование */
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 78px;
+            background: #9747FF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            padding: 0 60px;
+            z-index: 1000; /* Убедитесь, что хэдер поверх других элементов */
+        }
+
+        /* Остальные стили остаются без изменений */
+        .nav {
+            display: flex;
+            gap: 24px;
+            position: absolute;
+            left: 60px;
+            top: 24px;
+            bottom: 24px;
+        }
+
+        .chip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 136px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chip.light {
+            background: transparent;
+            border: 1px solid white;
+        }
+
+        .chip.light .label {
+            color: white;
+        }
+
+        .chip.dark {
+            background: transparent;
+            border: 1px solid white;
+        }
+
+        .chip.dark .label {
+            color: white;
+        }
+
+        .chip.active {
+            background: white !important;
+            border: 1px solid white !important;
+        }
+
+        .chip.active .label {
+            color: #9747FF !important;
+            font-weight: 500;
+        }
+
+        .label {
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0 4px;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            position: absolute;
+            left: 377px;
+            right: 324px;
+            top: 19px;
+            height: 49px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field {
+            width: 739px;
+            height: 38px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field input {
+            flex: 1;
+            height: 36px;
+            padding: 6px 12px;
+            border: none;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            color: #596169;
+            opacity: 0.7;
+        }
+
+        .input-field input:focus {
+            outline: none;
+        }
+
+        .icons {
+            display: flex;
+            gap: 17px;
+            position: absolute;
+            right: 22.92px;
+            top: calc(50% - 39.43px/2 - 0.29px);
+            align-items: center;
+        }
+
+        /* Обновленные стили для иконки корзины */
+        .cart-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cart-icon i {
+            font-size: 22px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .cart-icon:hover i {
+            transform: scale(1.1);
+            color: #f0f0f0;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #FFD700; /* Золотой цвет вместо красного */
+            color: #333;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .cart-icon:hover .cart-count {
+            background: #FFEC8B; /* Светло-золотой при наведении */
+            transform: scale(1.1);
+        }
+
+        .logout-button {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-button i {
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 20px;
+            }
+
+            .nav {
+                left: 20px;
+            }
+
+            .search-bar {
+                left: 200px;
+                right: 120px;
+            }
+
+            .icons {
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <div class="chip {% if request.path == url_for('show_books') %}active{% endif %} light">
+                <a href="{{ url_for('show_books') }}" class="label">Книги</a>
+            </div>
+            <div class="chip {% if request.path == url_for('shelf') %}active{% endif %} dark">
+                <a href="{{ url_for('shelf') }}" class="label">Стеллажи</a>
+            </div>
+        </div>
+        <div class="search-bar">
+            <div class="input-field">
+                <input type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <div class="icons">
+           <div class="icon cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">
+
+                </span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </a>
+        </div>
+    </div>
+</body>
+</html>

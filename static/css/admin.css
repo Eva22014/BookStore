@@ -18,6 +18,7 @@ body {
     color: #ccc;
     font-family: Arial, sans-serif;
     min-height: 100vh;
+    padding-top: 78px;
 }
 
 .admin-header {
@@ -27,9 +28,11 @@ body {
     color: var(--text-light);
     height: 78px;
     padding: 0 20px;
-    position: sticky;
-    z-index: 1000;
+     position: fixed; /* Изменено с sticky на fixed */
     top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 
