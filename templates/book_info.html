@@ -15,18 +15,82 @@
             color: #212529;
         }
         .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 78px;
+            background: #9747FF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            background-color: #9747FF;
-            padding: 10px 20px;
-            color: white;
+            padding: 0 60px;
         }
-        .header a {
-            color: white;
-            text-decoration: none;
-            margin: 0 10px;
+
+        .nav {
+            display: flex;
+            gap: 24px;
+            position: absolute;
+            left: 60px;
+            top: 24px;
+            bottom: 24px;
         }
+
+        .chip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 136px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chip.light {
+            background: #FFFFFF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.light .label {
+            color: #9747FF;
+        }
+
+        .chip.dark {
+            background: #9747FF;
+            border: 1px solid #9747FF;
+        }
+
+        .chip.dark .label {
+            color: #FFFFFF;
+        }
+
+        .label {
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .icons {
+            display: flex;
+            gap: 17px;
+            position: absolute;
+            right: 22.92px;
+            top: calc(50% - 39.43px/2 - 0.29px);
+        }
+
+        .icon {
+            width: 47.08px;
+            height: 39.43px;
+            background: #FFFFFF;
+            border: 1px solid #FFFFFF;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .container {
             max-width: 800px;
             margin: 20px auto;
@@ -36,6 +100,10 @@
             padding: 20px;
             display: flex;
             gap: 20px;
+            position: absolute;
+            top: 157px;
+            left: 0;
+            right: 0;
         }
         .book-cover {
             flex: 1;
@@ -85,6 +153,11 @@
             margin-top: 20px;
             display: flex;
             gap: 10px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
         }
         .buttons button {
             flex: 1;
@@ -99,33 +172,119 @@
         .buttons button:hover {
             background-color: #7a39d5;
         }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+                gap: 30px;
+                top: 100px;
+            }
+
+            .header {
+                padding: 0 20px;
+            }
+
+            .nav {
+                left: 20px;
+            }
+
+            .icons {
+                right: 20px;
+            }
+
+            .buttons {
+                bottom: 10px;
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                top: 80px;
+            }
+
+            .book-cover img {
+                width: 100px;
+                height: 140px;
+            }
+
+            .book-details h1 {
+                font-size: 18px;
+            }
+
+            .book-details p {
+                font-size: 14px;
+            }
+
+            .book-details .price {
+                font-size: 16px;
+            }
+
+            .book-details .add-to-cart {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .description h2 {
+                font-size: 16px;
+            }
+
+            .description p {
+                font-size: 12px;
+            }
+
+            .buttons button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="/">Книги</a>
-        <a href="#">Степлки</a>
-        <div>
-            <a href="#">🛒</a>
-            <a href="#">👤</a>
+        <div class="nav">
+            <div class="chip dark">
+                <a href="/" class="label">Книги</a>
+            </div>
+            <div class="chip dark">
+                <a href="/shelf" class="label">Стеллажи</a>
+            </div>
+        </div>
+        <div class="icons">
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-fill" viewBox="0 0 16 16">
+                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2v2H.5a.5.5 0 0 1-.5-.5zM3 0H1a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V1a2 2 0 0 0-2-2H3zm6.5 1A.5.5 0 0 1 10 2H5a.5.5 0 0 1 0-1h5.5Zm3 .5v7h-1a.5.5 0 0 1-.5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5v-7a.5.5 0 0 1 .5-.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 .5.5Z"/>
+                </svg>
+            </div>
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 4 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                </svg>
+            </div>
         </div>
     </div>
     <div class="container">
         <div class="book-cover">
-            <img src="https://via.placeholder.com/200x300" alt="Евгений Онегин">
+            {% if book.image_url %}
+                <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
+            {% else %}
+                <img src="https://via.placeholder.com/200x300" alt="{{ book.title }}">
+            {% endif %}
         </div>
         <div class="book-details">
-            <h1>Евгений Онегин</h1>
-            <p><strong>ТЕМАТИКА:</strong> любовь и отношения</p>
-            <p><strong>АВТОР:</strong> Пушкин Александр Сергеевич</p>
-            <p><strong>ЖАНР:</strong> Роман</p>
-            <p><strong>КОЛ-ВО:</strong> 75</p>
-            <p><strong>ИЗДАТЕЛЬСТВО:</strong> Речив</p>
-            <p class="price">Цена: 1500 руб.</p>
+            <h1>{{ book.title }}</h1>
+            <p><strong>ТЕМАТИКА:</strong> {{ book.theme }}</p>
+            <p><strong>АВТОР:</strong> {{ book.author }}</p>
+            <p><strong>ЖАНР:</strong> {{ book.genre }}</p>
+            <p><strong>КОЛ-ВО:</strong> {{ book.quantity }}</p>
+            <p><strong>ИЗДАТЕЛЬСТВО:</strong> {{ book.publisher }}</p>
+            <p class="price">Цена: {{ book.price }} руб.</p>
             <button class="add-to-cart">Добавить в корзину</button>
             <div class="description">
                 <h2>Описание</h2>
-                <p>Феномен романа в стихах "Евгений Онегин" заключается в том, что Пушкин в поэтическом слове представил "энциклопедию русской жизни", изобилующую деталями и отсылками, изящно вплетенными в повествование. Читатель обнаруживает за легкостью и красотой пушкинского слога философские рассуждения, метакостумную рефлексию, ироничные замечания автора. История главных героев, образы Онегина и Татьяны кажутся настолько знакомыми и близкими, что никого не могут оставить равнодушным.</p>
+                <p>{{ book.description }}</p>
             </div>
         </div>
     </div>

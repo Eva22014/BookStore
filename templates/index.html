@@ -582,54 +582,21 @@
         <div class="book-container">
             <h1>ПОПУЛЯРНЫЕ</h1>
             <div class="book-grid">
-                <div class="book-item" onclick="window.location.href='/book_info'">
-                    <img src="https://via.placeholder.com/140x200" alt="Евгений Онегин">
-                    <div class="book-title">Евгений Онегин</div>
-                    <div class="price">529 р</div>
-                    <button class="add-to-cart">В корзину</button>
+                {% for book in books %}
+                <div class="book-item" onclick="window.location.href='/book_info/{{ book.id }}'">
+                    {% if book.image_url %}
+                    <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="book-title">{{ book.title }}</div>
+                    <div class="price">{{ book.price }} ₽</div>
+                    {% if book.in_stock %}
+                        <button class="add-to-cart">В корзину</button>
+                    {% else %}
+                        <div class="out-of-stock">Нет в наличии</div>
+                        <button class="add-to-cart" disabled>В корзину</button>
+                    {% endif %}
                 </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Маленькие женщины">
-                    <div class="book-title">Маленькие женщины</div>
-                    <div class="price">1228 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Алиса в стране чудес">
-                    <div class="book-title">Приключения Алисы в стране чудес</div>
-                    <div class="price">1300 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Альберт Эйнштейн">
-                    <div class="book-title">Альберт Эйнштейн и его теория относительности</div>
-                    <div class="out-of-stock">НЕТ В НАЛИЧИИ</div>
-                    <button class="add-to-cart" disabled>В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Евгений Онегин">
-                    <div class="book-title">Евгений Онегин</div>
-                    <div class="price">2424 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Пираты">
-                    <div class="book-title">Пираты</div>
-                    <div class="price">1349 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Мефистофель">
-                    <div class="book-title">Мефистофель. История одной карьеры</div>
-                    <div class="price">622 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
-                <div class="book-item">
-                    <img src="https://via.placeholder.com/140x200" alt="Цветок яблони">
-                    <div class="book-title">Цветок яблони</div>
-                    <div class="price">507 р</div>
-                    <button class="add-to-cart">В корзину</button>
-                </div>
+                {% endfor %}
             </div>
         </div>
         <!-- Боковая панель с фильтрами (справа) -->
