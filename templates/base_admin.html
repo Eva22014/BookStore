@@ -10,18 +10,24 @@
 <body>
     <header class="admin-header">
         <div class="header-left">
-            <div class="header-tab active">УЧЕТНЫЕ ЗАПИСИ</div>
+        <!-- Кнопка "Учётные записи" -->
+        <a href="/admin_main" class="header-tab {% if request.path == '/admin_main' %}active{% endif %}">
+            УЧЁТНЫЕ ЗАПИСИ
+        </a>
 
-            <div class="dropdown">
-                <div class="header-tab dropdown-toggle">СПРАВОЧНИКИ <i class="fas fa-chevron-down"></i></div>
-                <div class="dropdown-content">
-                    <a href="/genre"><i class="fas fa-book"></i> Жанры</a>
-                    <a href="/theme"><i class="fas fa-tags"></i> Тематики</a>
-                    <a href="/publisher"><i class="fas fa-building"></i> Издательства</a>
-                    <a href="/author"><i class="fas fa-user-edit"></i> Авторы</a>
-                </div>
+        <!-- Справочники с выпадающим меню -->
+        <div class="dropdown">
+            <div class="header-tab dropdown-toggle {% if 'reference' in request.view_args|default({}) or 'id' in request.view_args|default({}) %}active{% endif %} ">
+                СПРАВОЧНИКИ <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="dropdown-content">
+                <a href="/genre"><i class="fas fa-book"></i> Жанры</a>
+                <a href="/theme"><i class="fas fa-tags"></i> Тематики</a>
+                <a href="/publisher"><i class="fas fa-building"></i> Издательства</a>
+                <a href="/author"><i class="fas fa-user-edit"></i> Авторы</a>
             </div>
         </div>
+    </div>
 
         <div class="header-center">
             <div class="search-container">

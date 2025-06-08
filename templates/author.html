@@ -1,0 +1,41 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Авторы{% endblock %}
+
+{% block body %}
+<div class="publishers-container">
+    <div class="header-actions">
+        <h2><i class="fas fa-user-edit"></i> Авторы</h2>
+        <a href="#" class="btn btn-add disabled"><i class="fas fa-plus"></i> Добавить</a>
+    </div>
+
+    <table class="publishers-table">
+        <thead>
+            <tr>
+                <th>Фамилия</th>
+                <th>Имя</th>
+                <th>Отчество</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in authors %}
+            <tr>
+                <td>{{ author.surname }}</td>
+                <td>{{ author.first_name }}</td>
+                <td>{{ author.patronymic or '-' }}</td>
+                <td class="actions">
+                    <a href="#" class="btn btn-edit" title="Редактировать">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="#" class="btn btn-delete" title="Удалить"
+                       onclick="return confirm('Вы уверены?')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
