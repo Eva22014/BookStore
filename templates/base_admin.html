@@ -38,9 +38,12 @@
 
         <div class="header-right">
             <div class="header-tab"><i class="fas fa-database"></i> РЕЗЕРВНОЕ КОПИРОВАНИЕ</div>
-            <div class="profile-icon">
-                <img src="{{ url_for('static', filename='images/admin-avatar.png') }}" alt="Admin">
-            </div>
+
+
+                            <!-- Кнопка выхода -->
+                <a href="{{ url_for('logout') }}" class="header-tab logout-button">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
         </div>
     </header>
 

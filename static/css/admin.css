@@ -27,9 +27,11 @@ body {
     color: var(--text-light);
     height: 78px;
     padding: 0 20px;
-    position: relative;
+    position: sticky;
     z-index: 1000;
+    top: 0;
 }
+
 
 .header-left {
     display: flex;
@@ -895,4 +897,101 @@ body,
     margin-bottom: 20px;
     border: 1px solid #f5c6cb;
     border-radius: 4px;
+}
+
+.logout-button {
+    background-color: #673ab7; /* Цвет как у хэдера */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover,
+.logout-button:focus {
+    background-color: #512da8; /* Темнее фиолетовый при наведении */
+    text-decoration: none;
+}
+
+
+
+
+
+.employee-detail-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.employee-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 150px;
+    color: #555;
+}
+
+.info-value {
+    color: #333;
+}
+
+/* === Кнопки действий === */
+.employee-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #333 !important;
+}
+
+.action-btn:hover {
+    background-color: #e9ecef;
+    transform: scale(1.1);
+}
+
+.edit-btn i {
+    color: #28a745; /* зелёный */
+}
+
+.delete-btn i {
+    color: #dc3545; /* красный */
+}
+
+.block-btn i {
+    color: #ffc107; /* жёлтый */
+}
+
+.back-btn i {
+    color: #007bff; /* синий */
 }

@@ -16,79 +16,33 @@
 
         <div class="info-row">
             <span class="info-label">Телефон:</span>
-            <span class="info-value">{{ employee.phone }}</span>
+            <span class="info-value">{{ employee.phone or '—' }}</span>
         </div>
 
         <div class="info-row">
             <span class="info-label">Почта:</span>
-            <span class="info-value">{{ employee.email }}</span>
+            <span class="info-value">{{ employee.email or '—' }}</span>
         </div>
 
         <div class="info-row">
             <span class="info-label">Дата найма:</span>
-            <span class="info-value">
-                {{ employee.hire_date.strftime('%d.%m.%Y') if employee.hire_date else 'Не указана' }}
-            </span>
+            <span class="info-value">{{ employee.hire_date.strftime('%d.%m.%Y') if employee.hire_date else 'Не указана' }}</span>
         </div>
     </div>
 
     <div class="employee-actions">
-        <a href="{{ url_for('show_employees') }}" class="action-btn">Назад к списку</a>
+        <a href="{{ url_for('show_employees') }}" class="action-btn" title="Назад к списку">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <a href="#" class="action-btn edit-btn" title="Редактировать">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="#" class="action-btn delete-btn" title="Удалить" onclick="return confirm('Вы уверены?')">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        <a href="#" class="action-btn block-btn" title="Заблокировать">
+            <i class="fas fa-ban"></i>
+        </a>
     </div>
 </div>
-
-<style>
-.employee-detail-container {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.employee-header {
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.info-row {
-    display: flex;
-    margin-bottom: 15px;
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
-}
-
-.info-label {
-    font-weight: bold;
-    width: 150px;
-    color: #555;
-}
-
-.info-value {
-    flex: 1;
-}
-
-.employee-actions {
-    margin-top: 30px;
-    text-align: center;
-}
-
-.action-btn {
-    display: inline-block;
-    padding: 8px 16px;
-    width: 120px;
-    background: #4a6fa5;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    text-align: center;
-}
-
-.action-btn:hover {
-    background: #3a5a8f;
-}
-</style>
 {% endblock %}
