@@ -1,37 +1,145 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оформление продажи</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    {% include 'header.html' %}
+{% include 'header.html' %}
 
-    <div class="container">
-        <h2>Подтверждение продажи</h2>
+<div class="container">
+    <h1>Подтверждение продажи</h1>
 
-        <div class="checkout-summary">
-            <p>Итого: <span id="total-price">{{ total }} ₽</span></p>
-
-            <div class="payment-method">
-                <label for="payment-method">Способ оплаты:</label>
-                <select id="payment-method" name="payment-method">
-                    <option value="cash">Наличные</option>
-                    <option value="card">Карта</option>
-                    <option value="sbp">СБП</option>
-                    <option value="qr">QR-код</option>
-                </select>
-            </div>
-
-            <div class="checkout-buttons">
-                <button id="back-to-cart" class="btn-secondary">Вернуться в корзину</button>
-                <button id="confirm-sale" class="btn-primary">Продать</button>
-            </div>
-        </div>
+    <div class="total-section">
+        Итого к оплате: <span id="total-price">{{ total }} ₽</span>
     </div>
 
-    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
-</body>
-</html>
+    <form id="payment-form">
+        <div class="payment-options">
+            <label>Способ оплаты:</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="payment-method" value="cash" checked> 💵 Наличные
+                </label>
+                <label>
+                    <input type="radio" name="payment-method" value="card"> 💳 Банковская карта
+                </label>
+                <label>
+                    <input type="radio" name="payment-method" value="sbp"> 📱 СБП (Система быстрых платежей)
+                </label>
+                <label>
+                    <input type="radio" name="payment-method" value="qr"> 🔳 QR-код
+                </label>
+            </div>
+        </div>
+    </form>
+
+    <div class="actions">
+        <a href="{{ url_for('cart') }}" class="back-btn">← Вернуться в корзину</a>
+        <button id="confirm-sale" class="confirm-btn">✅ Подтвердить продажу</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('confirm-sale').addEventListener('click', async function () {
+            try {
+                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                const cartId = "{{ cart_id }}";
+
+                const response = await fetch("{{ url_for('process_payment') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        payment_method: paymentMethod,
+                        cart_id: cartId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, text: ${errorText}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    // Обновляем состояние корзины на главной после оплаты
+                    document.querySelectorAll('.book-item').forEach(item => {
+                        const bookId = item.getAttribute('data-book-id');
+                        fetch(`/check_cart/${bookId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const quantity = data.quantity;
+                                const cartControl = document.querySelector(`.cart-control[data-book-id="${bookId}"]`);
+                                if (cartControl) {
+                                    const addButton = cartControl.querySelector('.add-to-cart');
+                                    const quantitySpan = cartControl.querySelector('.cart-quantity');
+                                    quantitySpan.textContent = quantity;
+                                    if (quantity === 0) {
+                                        addButton.style.display = 'inline';
+                                        quantitySpan.style.display = 'none';
+                                    }
+                                }
+                            });
+                    });
+                    window.location.href = "{{ url_for('sale_success') }}";
+                } else {
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка: ' + error.message);
+            }
+        });
+    });
+</script>
+
+<style>
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .total-section {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .payment-options {
+        margin-bottom: 20px;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .back-btn, .confirm-btn {
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .back-btn {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+
+    .confirm-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .confirm-btn:hover {
+        background-color: #45a049;
+    }
+</style>

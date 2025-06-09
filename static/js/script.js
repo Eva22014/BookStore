@@ -1,74 +1,32 @@
-// script.js
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Обновление общей стоимости
+document.addEventListener('DOMContentLoaded', function () {
+    // === Обновление общей стоимости ===
     function updateTotal() {
-        const subtotalElements = document.querySelectorAll('.subtotal');
         let total = 0;
+        document.querySelectorAll('.cart-item').forEach(function (item) {
+            const qtyInput = item.querySelector('.quantity-input');
+            const priceSpan = item.querySelector('.price');
 
-        subtotalElements.forEach(subtotal => {
-            total += parseFloat(subtotal.textContent.replace(' ₽', ''));
+            if (!qtyInput || !priceSpan) return;
+
+            const qty = parseInt(qtyInput.value);
+            const priceText = priceSpan.textContent.replace('₽', '').trim();
+            const price = parseFloat(priceText);
+
+            if (!isNaN(qty) && !isNaN(price)) {
+                total += qty * price;
+            }
         });
 
-        document.getElementById('total-price').textContent = total.toFixed(2);
+        const totalSpan = document.getElementById('total-price');
+        if (totalSpan) {
+            totalSpan.textContent = `${total.toFixed(2)} ₽`;
+        }
     }
 
-    // Обработка изменения количества товара
-    document.querySelectorAll('.quantity-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-            const action = event.target.dataset.action;
-            const itemId = event.target.dataset.id;
-            const input = document.querySelector(`[data-id="${itemId}"].quantity-input`);
-            let quantity = parseInt(input.value);
-
-            if (action === 'increase') {
-                quantity++;
-            } else if (action === 'decrease') {
-                if (quantity > 1) {
-                    quantity--;
-                }
-            }
-
-            input.value = quantity;
-
-            // Обновление подсуммы
-            const price = parseFloat(input.parentElement.nextElementSibling.textContent.replace(' ₽', ''));
-            const subtotal = document.querySelector(`[data-id="${itemId}"].subtotal`);
-            subtotal.textContent = (quantity * price).toFixed(2) + ' ₽';
-
-            updateTotal();
-        });
-    });
-
-    // Обработка удаления товара
-    document.querySelectorAll('.remove-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-            const itemId = event.target.dataset.id;
-            const item = event.target.closest('.cart-item');
-            item.remove();
-
-            updateTotal();
-        });
-    });
-
-    // Обработка очистки корзины
-    document.getElementById('clear-cart').addEventListener('click', () => {
-        const cartItems = document.querySelector('.cart-items');
-        cartItems.innerHTML = '';
-        updateTotal();
-    });
-});
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
+    // === Изменение количества через кнопки +/- ===
     document.querySelectorAll('.quantity-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            const input = btn.parentElement.querySelector('.quantity-input');
+            const input = btn.closest('.quantity-control').querySelector('.quantity-input');
             const id = btn.dataset.id;
             let value = parseInt(input.value);
 
@@ -82,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // === Изменение количества вручную ===
     document.querySelectorAll('.quantity-input').forEach(function (input) {
         const id = input.closest('.quantity-control').querySelector('.quantity-btn').dataset.id;
 
@@ -98,15 +57,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // === Отправка нового количества на сервер ===
     function updateQuantity(id, quantity, input) {
         fetch(`/add_to_cart/${id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `quantity=${quantity}`
+            body: `quantity=${encodeURIComponent(quantity)}`
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Сетевая ошибка');
+            return res.json();
+        })
         .then(data => {
             if (data.success) {
                 input.value = data.quantity;
@@ -116,33 +79,85 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert(data.error);
                 fetch(`/check_cart/${id}`)
                     .then(res => res.json())
-                    .then(d => input.value = d.quantity);
+                    .then(d => {
+                        input.value = d.quantity;
+                        updateSubtotal(id, d.quantity, data.price || 0);
+                        updateTotal();
+                    });
             }
+        })
+        .catch(err => {
+            console.error('Ошибка:', err);
+            alert('Не удалось обновить количество. Проверьте соединение.');
         });
     }
 
+    // === Обновление подитога по книге ===
     function updateSubtotal(id, quantity, price) {
         const subtotalSpan = document.querySelector(`.subtotal[data-id='${id}']`);
-        const subtotal = (quantity * price).toFixed(2);
         if (subtotalSpan) {
-            subtotalSpan.textContent = `${subtotal} ₽`;
+            subtotalSpan.textContent = `${(quantity * price).toFixed(2)} ₽`;
         }
     }
 
-    function updateTotal() {
-        let total = 0;
-        document.querySelectorAll('.cart-item').forEach(function (item) {
-            const qty = parseInt(item.querySelector('.quantity-input').value);
-            const price = parseFloat(item.querySelector('.price').textContent.replace('₽', '').trim());
-            if (!isNaN(qty) && !isNaN(price)) {
-                total += qty * price;
-            }
+    // === Удаление товара из корзины ===
+    document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            const itemId = event.target.dataset.id;
+            const item = event.target.closest('.cart-item');
+            if (item) item.remove();
+
+            fetch(`/remove_from_cart/${itemId}`, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const cartControl = document.querySelector(`.cart-control[data-book-id="${itemId}"]`);
+                    if (cartControl) {
+                        const addButton = cartControl.querySelector('.add-to-cart');
+                        const quantitySpan = cartControl.querySelector('.cart-quantity');
+                        if (quantitySpan) quantitySpan.textContent = 0;
+                        if (addButton) {
+                            addButton.style.display = 'inline';
+                            if (quantitySpan) quantitySpan.style.display = 'none';
+                        }
+                    }
+                }
+                updateTotal();
+            });
         });
-        const totalSpan = document.getElementById('total-price');
-        if (totalSpan) {
-            totalSpan.textContent = `${total.toFixed(2)} ₽`;
-        }
-    }
+    });
+
+    // === Очистка корзины ===
+    document.getElementById('clear-cart')?.addEventListener('click', () => {
+        if (!confirm('Вы уверены, что хотите очистить корзину?')) return;
+
+        fetch('/clear_cart', {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(() => {
+            document.querySelectorAll('.cart-item').forEach(item => item.remove());
+            updateTotal();
+
+            document.querySelectorAll('.book-item').forEach(bookItem => {
+                const bookId = bookItem.getAttribute('data-book-id');
+                fetch(`/check_cart/${bookId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const cartControl = document.querySelector(`.cart-control[data-book-id="${bookId}"]`);
+                        if (cartControl) {
+                            const addButton = cartControl.querySelector('.add-to-cart');
+                            const quantitySpan = cartControl.querySelector('.cart-quantity');
+                            if (quantitySpan) quantitySpan.textContent = 0;
+                            if (addButton) {
+                                addButton.style.display = 'inline';
+                                if (quantitySpan) quantitySpan.style.display = 'none';
+                            }
+                        }
+                    });
+            });
+        });
+    });
 });
-
-

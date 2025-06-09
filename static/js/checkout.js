@@ -1,51 +1,33 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const confirmBtn = document.getElementById('confirm-sale');
-    const backBtn = document.getElementById('back-to-cart');
-    const paymentSelect = document.getElementById('payment-method');
+document.getElementById('confirm-sale').addEventListener('click', async function() {
+    try {
+        const paymentMethod = document.getElementById('payment-method').value;
+        const cartId = "{{ cart_id }}";
 
-    backBtn.addEventListener('click', function() {
-        window.location.href = "{{ url_for('cart') }}";
-    });
-
-    confirmBtn.addEventListener('click', function() {
-        const paymentMethod = paymentSelect.value;
-
-        fetch("{{ url_for('process_payment') }}", {
+        const response = await fetch("{{ url_for('process_payment') }}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 payment_method: paymentMethod,
-                cart_id: "{{ cart_id }}"
+                cart_id: cartId
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = "{{ url_for('sale_success') }}?sale_id=" + data.sale_id;
-            } else {
-                alert('Ошибка: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Произошла ошибка при оформлении заказа');
         });
-    });
-});
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Перенаправляем на страницу успешного оформления
-                window.location.href = "{{ url_for('sale_success') }}?sale_id=" + data.sale_id;
-            } else {
-                alert('Ошибка: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Произошла ошибка при оформлении заказа');
-        });
-    });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, text: ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Триггерим событие обновления корзины
+            $(document).trigger('cartUpdated');
+            window.location.href = "{{ url_for('sale_success') }}";
+        } else {
+            alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка: ' + error.message);
+    }
 });
