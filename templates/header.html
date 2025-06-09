@@ -235,12 +235,11 @@
             </div>
         </div>
         <div class="icons">
-           <div class="icon cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count">
-
-                </span>
+          <div class="cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
+                <i class="fas fa-shopping-basket"></i> <!-- Изменил на shopping-basket для более красивого вида -->
+                <span class="cart-count">1</span>
             </div>
+
             <a href="{{ url_for('logout') }}" class="logout-button">
                 <i class="fas fa-sign-out-alt"></i> Выйти
             </a>
