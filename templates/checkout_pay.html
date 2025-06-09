@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление продажи</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        <h2>Подтверждение продажи</h2>
+
+        <div class="checkout-summary">
+            <p>Итого: <span id="total-price">{{ total }} ₽</span></p>
+
+            <div class="payment-method">
+                <label for="payment-method">Способ оплаты:</label>
+                <select id="payment-method" name="payment-method">
+                    <option value="cash">Наличные</option>
+                    <option value="card">Карта</option>
+                    <option value="sbp">СБП</option>
+                    <option value="qr">QR-код</option>
+                </select>
+            </div>
+
+            <div class="checkout-buttons">
+                <button id="back-to-cart" class="btn-secondary">Вернуться в корзину</button>
+                <button id="confirm-sale" class="btn-primary">Продать</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+</body>
+</html>

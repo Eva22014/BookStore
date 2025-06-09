@@ -4,136 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Корзина</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 100px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .item-info {
-            flex: 2;
-        }
-
-        .item-quantity {
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            margin: 0 10px;
-        }
-
-        .quantity-btn {
-            background: #9747FF;
-            color: white;
-            border: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .quantity-input {
-            width: 40px;
-            text-align: center;
-            margin: 0 5px;
-        }
-
-        .item-price {
-            flex: 1;
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .cart-summary {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .checkout-btn {
-            background: #9747FF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .checkout-btn:hover {
-            background: #7a39d5;
-        }
-
-        .clear-cart {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     {% include 'header.html' %}
 
     <div class="container">
-        <h1>Корзина</h1>
+        <h2>Корзина</h2>
 
-        <button class="clear-cart">Очистить корзину</button>
+        <!-- Сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-        <div class="cart-item">
-            <div class="item-info">Евгений Онегин</div>
-            <div class="item-quantity">
-                <button class="quantity-btn">-</button>
-                <input type="text" class="quantity-input" value="1">
-                <button class="quantity-btn">+</button>
+        <!-- Корзина пуста -->
+        {% if not items %}
+            <p>Корзина пуста.</p>
+        {% else %}
+
+            <!-- Секция для управления корзиной -->
+            <div class="cart-controls">
+                <button id="clear-cart">Очистить корзину</button>
             </div>
-            <div class="item-price">2424 р</div>
-        </div>
 
-        <div class="cart-summary">
-            <div>Количество товаров: 1</div>
-            <div>Итого: 2424 р</div>
-        </div>
+            <!-- Список товаров -->
+            <div class="cart-items">
+                {% for item in items %}
+                <div class="cart-item">
+                    <img src="{{ item.image_url }}" alt="{{ item.title }}" class="product-image">
+                    <div class="item-details">
+                        <span class="item-title">{{ item.title }}</span>
+                        <div class="quantity-control">
+                                <button class="quantity-btn" data-action="decrease" data-id="{{ item.id }}">-</button>
+                                <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1">
+                                <button class="quantity-btn" data-action="increase" data-id="{{ item.id }}">+</button>
+                            </div>
+                            <span class="price">{{ item.price }} ₽</span>
+                            <span class="subtotal" data-id="{{ item.id }}">{{ item.subtotal }} ₽</span>
+                            <button class="remove-btn" data-id="{{ item.id }}">Удалить</button>
 
-        <button class="checkout-btn">Оформить продажу</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Общая сумма -->
+            <div class="cart-summary">
+                <p>Количество товаров: {{ total_quantity }}</p>
+                <p>Итого: <span id="total-price">{{ total }} ₽</span></p>
+                <button id="checkout-btn" onclick="window.location.href='/checkout'">Оформить продажу</button>
+            </div>
+        {% endif %}
     </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

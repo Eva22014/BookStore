@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, CheckConstraint
 from urllib.parse import quote_plus
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -225,17 +225,12 @@ def employee_detail(employee_id):
         return "Внутренняя ошибка сервера", 500
 
 
-@app.route('/index')
+@app.route('/index') #***
 def show_books():
     if 'employee_id' not in session:
         return redirect(url_for('login'))
 
     try:
-        # Проверка наличия данных в связанных таблицах
-        if not Book.query.first():
-            flash("В базе нет ни одной книги", "info")
-            return render_template('index.html', books=[])
-
         books = Book.query.options(
             db.joinedload(Book.publisher),
             db.joinedload(Book.theme),
@@ -244,11 +239,12 @@ def show_books():
         ).all()
 
         books_data = []
+        book_locations = {bl.book_id: bl.quantity for bl in BookLocation.query.all()}
         for book in books:
             try:
                 authors = [f"{ba.author.surname} {ba.author.name}" for ba in book.book_authors]
                 genres = [bg.genre.name for bg in book.book_genres]
-                quantity = sum(bl.quantity for bl in book.book_locations)
+                quantity = book_locations.get(book.id, 0)
 
                 books_data.append({
                     "id": book.id,
@@ -259,20 +255,19 @@ def show_books():
                     "genres": ", ".join(genres) if genres else "Не указан",
                     "publisher": book.publisher.name if book.publisher else "Не указан",
                     "description": book.description or "",
-                    "image_url": book.image_url if book.image_url else None
-
+                    "image_url": book.image_url if book.image_url else None,
+                    "quantity": quantity  # Добавлено для max в форме
                 })
             except Exception as e:
                 app.logger.error(f"Ошибка обработки книги ID {book.id}: {str(e)}")
                 continue
 
-        return render_template('index.html', books=books_data)
+        return render_template('index.html', books=books_data, book_location=book_locations)
 
     except Exception as e:
         app.logger.error(f"Ошибка загрузки книг: {str(e)}", exc_info=True)
         flash("Произошла ошибка при загрузке каталога книг")
         return render_template('index.html', books=[])
-
 @app.route('/book_info/<int:book_id>')
 def book_info(book_id):
     app.logger.info(f"Book_info accessed for book {book_id}, session: {session.get('employee_id', 'None')}")
@@ -527,18 +522,326 @@ def backup():
     return redirect(url_for('show_employees'))
 
 
+
+
+
+
+
+
+# МОЁ НОВОЕ КОРЗИНА
+class Cart(db.Model):
+    __tablename__ = 'Корзина'
+    id = db.Column('ID корзины', db.Integer, primary_key=True)
+    employee_id = db.Column('ID сотрудника', db.Integer, db.ForeignKey('Сотрудник.ID сотрудника'), unique=True)
+    created_at = db.Column('Дата создания', db.DateTime, default=db.func.current_timestamp())
+    status = db.Column('Статус', db.String(20), default='Активна')
+
+class CartItem(db.Model):
+    __tablename__ = 'Содержимое корзины'
+    cart_id = db.Column('ID корзины', db.Integer, db.ForeignKey('Корзина.ID корзины'), primary_key=True)
+    book_id = db.Column('ID книги', db.Integer, db.ForeignKey('Книга.ID книги'), primary_key=True)
+    quantity = db.Column('Количество', db.Integer, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint('Количество > 0', name='check_quantity_positive'),
+    )
+
+# ... (остальные существующие модели остаются)
+
+# === Маршруты === (добавляем маршрут add_to_cart)
+from flask import jsonify
+
+@app.route('/add_to_cart/<int:book_id>', methods=['POST'])
+def add_to_cart(book_id):
+    if 'employee_id' not in session:
+        return jsonify({'error': 'Пожалуйста, войдите в систему.'}), 401
+
+    employee_id = session['employee_id']
+    quantity = int(request.form.get('quantity', 1))
+
+    # Проверяем доступное количество
+    book_location = BookLocation.query.filter_by(book_id=book_id).first()
+    if not book_location or book_location.quantity < quantity:
+        return jsonify({'error': 'Недостаточно экземпляров в наличии.'}), 400
+
+    # Проверяем или создаём корзину
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        cart = Cart(employee_id=employee_id)
+        db.session.add(cart)
+        db.session.commit()
+
+    # Проверяем, есть ли книга в корзине
+    cart_item = CartItem.query.filter_by(cart_id=cart.id, book_id=book_id).first()
+    if cart_item:
+        if book_location.quantity >= cart_item.quantity + quantity:
+            cart_item.quantity = quantity  # Обновляем количество
+        else:
+            return jsonify({'error': 'Недостаточно экземпляров для увеличения количества.'}), 400
+    else:
+        cart_item = CartItem(cart_id=cart.id, book_id=book_id, quantity=quantity)
+        db.session.add(cart_item)
+
+    db.session.commit()
+    book = Book.query.get(book_id)
+    return jsonify({
+        'success': True,
+        'quantity': cart_item.quantity,
+        'price': float(book.price),  # ⬅️ Добавляем цену
+        'message': f'Книга "{book.title}" обновлена в корзине.'
+    })
+
+
+# Обновляем маршрут /cart для отображения корзины
 @app.route('/cart')
 def cart():
     if 'employee_id' not in session:
         return redirect(url_for('login'))
 
-    # Здесь должна быть логика получения данных корзины
-    # Пока просто вернем шаблон
-    return render_template('cart.html')
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        flash('Ваша корзина пуста.', 'info')
+        return render_template('cart.html', items=[])
 
+    cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+    items = []
+    total = 0
+    for item in cart_items:
+        book = Book.query.get(item.book_id)
+        if book:
+            subtotal = book.price * item.quantity
+            total += subtotal
+            items.append({
+                'id': book.id,
+                'title': book.title,
+                'quantity': item.quantity,
+                'price': float(book.price),
+                'subtotal': float(subtotal),
+                'image_url': url_for('static', filename=book.image_url) if book.image_url else None  # Добавлено
+            })
+
+
+    return render_template('cart.html', items=items, total=total)
+
+# ... (остальные существующие маршруты остаются)
+
+
+
+@app.route('/check_cart/<int:book_id>')
+def check_cart(book_id):
+    if 'employee_id' not in session:
+        return jsonify({'quantity': 0})
+
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        return jsonify({'quantity': 0})
+
+    cart_item = CartItem.query.filter_by(cart_id=cart.id, book_id=book_id).first()
+    return jsonify({'quantity': cart_item.quantity if cart_item else 0})
+
+@app.route('/remove_from_cart/<int:book_id>', methods=['POST'])
+def remove_from_cart(book_id):
+    if 'employee_id' not in session:
+        return jsonify({'error': 'Пожалуйста, войдите в систему.'}), 401
+
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        return jsonify({'success': True, 'quantity': 0, 'message': 'Товар удалён из корзины.'})
+
+    cart_item = CartItem.query.filter_by(cart_id=cart.id, book_id=book_id).first()
+    if cart_item:
+        db.session.delete(cart_item)
+        db.session.commit()
+        # Проверяем, остались ли элементы в корзине
+        if not CartItem.query.filter_by(cart_id=cart.id).first():
+            db.session.delete(cart)
+            db.session.commit()
+        return jsonify({'success': True, 'quantity': 0, 'message': 'Товар удалён из корзины.'})
+    return jsonify({'success': True, 'quantity': 0, 'message': 'Товар не найден в корзине.'})
+
+
+
+@app.route('/process_sale', methods=['POST'])
+def process_sale():
+    if 'employee_id' not in session:
+        return jsonify({'success': False, 'error': 'Необходима авторизация'}), 401
+
+    try:
+        data = request.get_json()
+        payment_method = data.get('payment_method', 'cash')
+        employee_id = session['employee_id']
+
+        # Получаем корзину
+        cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+        if not cart:
+            return jsonify({'success': False, 'error': 'Корзина пуста'}), 400
+
+        # Создаем запись о продаже
+        sale = Sale(
+            employee_id=employee_id,
+            total=sum(item.quantity * Book.query.get(item.book_id).price for item in cart.cart_items),
+            payment_method=payment_method,
+            sale_date=datetime.now()
+        )
+        db.session.add(sale)
+
+        # Добавляем товары продажи
+        for item in cart.cart_items:
+            sale_item = SaleItem(
+                sale_id=sale.id,
+                book_id=item.book_id,
+                quantity=item.quantity,
+                price=Book.query.get(item.book_id).price
+            )
+            db.session.add(sale_item)
+
+            # Уменьшаем количество на складе
+            book_location = BookLocation.query.filter_by(book_id=item.book_id).first()
+            if book_location:
+                book_location.quantity -= item.quantity
+                if book_location.quantity < 0:
+                    raise ValueError(f"Недостаточно товара для книги ID {item.book_id}")
+
+        # Очищаем корзину
+        CartItem.query.filter_by(cart_id=cart.id).delete()
+        db.session.delete(cart)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Продажа оформлена',
+            'sale_id': sale.id  # Возвращаем ID продажи для возможного чека
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+
+class Sale(db.Model):
+    __tablename__ = 'Продажа'
+    id = db.Column('ID продажи', db.Integer, primary_key=True)
+    employee_id = db.Column('ID сотрудника', db.Integer, db.ForeignKey('Сотрудник.ID сотрудника'))
+    total = db.Column('Сумма', db.Numeric(10, 2), nullable=False)
+    payment_method = db.Column('Способ оплаты', db.String(20), nullable=False)
+    sale_date = db.Column('Дата продажи', db.DateTime, nullable=False)
+    employee = db.relationship('Employee', backref='sales')
+
+class SaleItem(db.Model):
+    __tablename__ = 'Товары продажи'
+    id = db.Column('ID записи', db.Integer, primary_key=True)
+    sale_id = db.Column('ID продажи', db.Integer, db.ForeignKey('Продажа.ID продажи'))
+    book_id = db.Column('ID книги', db.Integer, db.ForeignKey('Книга.ID книги'))
+    quantity = db.Column('Количество', db.Integer, nullable=False)
+    price = db.Column('Цена', db.Numeric(10, 2), nullable=False)
+    book = db.relationship('Book', backref='sale_items')
+
+@app.route('/sale_success')
+def sale_success():
+    sale_id = request.args.get('sale_id')
+    sale = Sale.query.get(sale_id) if sale_id else None
+    return render_template('sale_success.html', sale=sale)
+
+@app.route('/checkout')
+def checkout():
+    """Перенаправляет на страницу оплаты"""
+    if 'employee_id' not in session:
+        flash('Пожалуйста, войните в систему.', 'error')
+        return redirect(url_for('login'))
+
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        flash('Ваша корзина пуста.', 'info')
+        return redirect(url_for('cart'))
+
+    # Перенаправляем на страницу оплаты
+    return redirect(url_for('checkout_pay'))
+
+@app.route('/checkout_pay')
+def checkout_pay():
+    """Страница подтверждения заказа и выбора способа оплаты"""
+    if 'employee_id' not in session:
+        return redirect(url_for('login'))
+
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        flash('Ваша корзина пуста.', 'info')
+        return redirect(url_for('cart'))
+
+    cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+    total = sum(item.quantity * Book.query.get(item.book_id).price for item in cart_items)
+
+    return render_template('checkout_pay.html',
+                         items=cart_items,
+                         total=float(total),
+                         cart_id=cart.id)
+
+@app.route('/process_payment', methods=['POST'])
+def process_payment():
+    """Обработка платежа и оформление заказа"""
+    if 'employee_id' not in session:
+        return jsonify({'success': False, 'error': 'Требуется авторизация'}), 401
+
+    try:
+        data = request.get_json()
+        payment_method = data.get('payment_method', 'cash')
+        employee_id = session['employee_id']
+        cart_id = data.get('cart_id')
+
+        # Получаем корзину
+        cart = Cart.query.filter_by(id=cart_id, employee_id=employee_id, status='Активна').first()
+        if not cart:
+            return jsonify({'success': False, 'error': 'Корзина не найдена'}), 400
+
+        # Создаем запись о продаже
+        sale = Sale(
+            employee_id=employee_id,
+            total=sum(item.quantity * Book.query.get(item.book_id).price for item in cart.cart_items),
+            payment_method=payment_method,
+            sale_date=datetime.now()
+        )
+        db.session.add(sale)
+
+        # Добавляем товары продажи и обновляем остатки
+        for item in cart.cart_items:
+            book = Book.query.get(item.book_id)
+            sale_item = SaleItem(
+                sale_id=sale.id,
+                book_id=item.book_id,
+                quantity=item.quantity,
+                price=book.price
+            )
+            db.session.add(sale_item)
+
+            # Обновляем остатки
+            book_location = BookLocation.query.filter_by(book_id=item.book_id).first()
+            if book_location:
+                book_location.quantity -= item.quantity
+                if book_location.quantity < 0:
+                    raise ValueError(f"Недостаточно товара: {book.title}")
+
+        # Очищаем корзину
+        db.session.delete(cart)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Заказ успешно оформлен',
+            'sale_id': sale.id
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Создает только новые таблицы, если они не существуют
+        db.create_all()  # Создаёт таблицы, включая новые
     app.run(debug=True, port=5001)
+
 
