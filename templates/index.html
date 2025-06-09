@@ -23,12 +23,14 @@
                 <div class="book-item" data-book-id="{{ book.id }}">
                     <div class="book-item-content">
                         {% if book.image_url %}
-                        <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}" class="book-image">
+                        <div class="book-image">
+                            <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
+                        </div>
                         {% endif %}
                         <div class="book-title">{{ book.title }}</div>
                         <div class="price">{{ book.price }} ₽</div>
                         {% if book.in_stock %}
-                        <div class="cart-controls" data-book-id="{{ book.id }}" data-quantity="0">
+                        <div class="cart-controls" data-book-id="{{ book.id }}" data-quantity="0" data-max-quantity="{{ book.quantity if book.quantity else 0 }}">
                             <button class="add-to-cart">В корзину</button>
                         </div>
                         {% else %}
@@ -100,6 +102,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для уведомлений -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <p id="modalMessage">Произошла ошибка при обновлении количества.</p>
+            <button class="modal-ok">OK</button>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -127,58 +138,79 @@
                 $controls.data('quantity', quantity);
             }
 
-            // Обработка добавления в корзину
-            $(document).on('click', '.add-to-cart', function(e) {
+            // Обработка добавления в корзину через делегирование
+            $('.cart-controls').on('click', '.add-to-cart', function(e) {
                 e.stopPropagation();
                 const $button = $(this);
                 const $controls = $button.closest('.cart-controls');
                 const bookId = $controls.data('book-id');
                 let quantity = parseInt($controls.data('quantity'));
+                const maxQuantity = parseInt($controls.data('max-quantity'));
 
                 if (quantity === 0) {
                     $.post(`/add_to_cart/${bookId}`, { quantity: 1 })
                         .done(function(response) {
                             if (response.success) {
-                                quantity = response.quantity;
+                                quantity = 1;
                                 updateCartControls($controls, bookId, quantity);
+
                             } else {
-                                alert(response.error || 'Ошибка при добавлении в корзину.');
+                                showNotification(response.error || 'Ошибка при добавлении в корзину.');
                             }
                         })
                         .fail(function() {
-                            alert('Ошибка при добавлении в корзину.');
+                            showNotification('Ошибка при добавлении в корзину.');
                         });
                 }
             });
 
-            // Обработка изменения количества
-            $(document).on('click', '.quantity-controls button', function(e) {
+            // Обработка изменения количества через делегирование
+            $('.cart-controls').on('click', '.quantity-controls button', function(e) {
                 e.stopPropagation();
                 const $button = $(this);
                 const $controls = $button.closest('.cart-controls');
                 const bookId = $controls.data('book-id');
                 let quantity = parseInt($controls.data('quantity'));
-                let newQuantity = quantity;
+                const maxQuantity = parseInt($controls.data('max-quantity'));
 
-                if ($button.data('action') === 'increase') {
-                    newQuantity = quantity + 1;
-                } else if ($button.data('action') === 'decrease') {
-                    newQuantity = quantity - 1;
+                if ($button.data('action') === 'increase' && quantity < maxQuantity) {
+                    quantity++;
+                } else if ($button.data('action') === 'increase' && quantity >= maxQuantity) {
+                    showNotification('Нельзя добавить больше экземпляров, так как их больше нет в наличии.');
+                    return;
+                } else if ($button.data('action') === 'decrease' && quantity > 1) {
+                    quantity--;
+                } else if ($button.data('action') === 'decrease' && quantity === 1) {
+                    $.post(`/remove_from_cart/${bookId}`)
+                        .done(function(response) {
+                            if (response.success) {
+                                quantity = 0;
+                                updateCartControls($controls, bookId, quantity);
+
+                            } else {
+                                showNotification(response.error || 'Ошибка при удалении из корзины.');
+                            }
+                        })
+                        .fail(function() {
+                            showNotification('Ошибка при удалении из корзины.');
+                        });
+                    return;
                 }
 
-                // Отправляем запрос на обновление количества
-                $.post(`/update_cart/${bookId}`, { quantity: newQuantity })
-                    .done(function(response) {
-                        if (response.success) {
-                            quantity = response.quantity;
-                            updateCartControls($controls, bookId, quantity);
-                        } else {
-                            alert(response.error || 'Ошибка при обновлении количества.');
-                        }
-                    })
-                    .fail(function() {
-                        alert('Ошибка при обновлении количества.');
-                    });
+                if (quantity > 0) {
+                    $.post(`/add_to_cart/${bookId}`, { quantity: quantity })
+                        .done(function(response) {
+                            if (response.success) {
+                                updateCartControls($controls, bookId, quantity);
+
+                            } else {
+                                showNotification(response.error || 'Произошла ошибка при обновлении количества.');
+                            }
+                        })
+                        .fail(function() {
+                            showNotification('Произошла ошибка при обновлении количества.');
+                        });
+                }
             });
 
             // Инициализация: проверяем текущее количество в корзине при загрузке
@@ -202,7 +234,53 @@
                     header.parentElement.classList.toggle('active');
                 });
             });
+
+            // Функция для отображения уведомления
+            function showNotification(message) {
+                const modal = $('#notificationModal');
+                $('#modalMessage').text(message);
+                modal.css('display', 'flex');
+                modal.find('.modal-ok').focus();
+            }
+
+            // Закрытие модального окна
+            $('.modal-ok').on('click', function() {
+                $('#notificationModal').hide();
+            });
+
+            // Закрытие модального окна при клике вне его
+            $(window).on('click', function(e) {
+                const modal = $('#notificationModal');
+                if (e.target === modal[0]) {
+                    modal.hide();
+                }
+            });
         });
+                    // Вместо document.dispatchEvent просто вызываем функцию
+            function addToCart(bookId) {
+                fetch(`/add_to_cart/${bookId}`, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateCartCount(); // Просто вызываем функцию
+                            // остальная логика...
+                        }
+                    });
+            }
+
+            // Аналогично для удаления
+            function removeFromCart(bookId) {
+                fetch(`/remove_from_cart/${bookId}`, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateCartCount(); // Просто вызываем функцию
+                            // остальная логика...
+                        }
+                    });
+            }
+
     </script>
+
 </body>
 </html>

@@ -362,37 +362,55 @@ def backup():
     flash("Функция резервного копирования пока не реализована")
     return redirect(url_for('show_employees'))
 
+
+
 @app.route('/add_to_cart/<int:book_id>', methods=['POST'])
 def add_to_cart(book_id):
     if 'employee_id' not in session:
         return jsonify({'error': 'Пожалуйста, войдите в систему.'}), 401
+
+    employee_id = session['employee_id']
     quantity = int(request.form.get('quantity', 1))
+
     book_location = BookLocation.query.filter_by(book_id=book_id).first()
-    if not book_location or book_location.quantity < quantity:
-        return jsonify({'error': 'Недостаточно экземпляров в наличии.'}), 400
-    cart = Cart.query.filter_by(employee_id=session['employee_id'], status='Активна').first()
+    if not book_location:
+        return jsonify({'success': False, 'error': 'Книга не найдена.'}), 400
+
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
     if not cart:
-        cart = Cart(employee_id=session['employee_id'])
-        db.session.add(cart)
-        db.session.commit()
+        if quantity > 0:
+            cart = Cart(employee_id=employee_id)
+            db.session.add(cart)
+            db.session.commit()
+        else:
+            return jsonify({'success': True, 'quantity': 0, 'message': 'Корзина пуста.'})
+
     cart_item = CartItem.query.filter_by(cart_id=cart.id, book_id=book_id).first()
     if cart_item:
-        if book_location.quantity >= cart_item.quantity + quantity:
-            cart_item.quantity += quantity
+        if quantity <= 0:
+            db.session.delete(cart_item)
+            db.session.commit()
+            if not CartItem.query.filter_by(cart_id=cart.id).first():
+                db.session.delete(cart)
+                db.session.commit()
+            return jsonify({'success': True, 'quantity': 0, 'message': 'Товар удалён из корзины.'})
+        elif quantity > book_location.quantity:
+            return jsonify({'success': False, 'error': 'Недостаточно экземпляров в наличии.'}), 400
         else:
-            return jsonify({'error': 'Недостаточно экземпляров для увеличения количества.'}), 400
-    else:
-        cart_item = CartItem(cart_id=cart.id, book_id=book_id, quantity=quantity)
-        db.session.add(cart_item)
-    db.session.commit()
-    book = Book.query.get(book_id)
-    return jsonify({
-        'success': True,
-        'quantity': cart_item.quantity,
-        'price': float(book.price),
-        'message': f'Книга "{book.title}" обновлена в корзине.'
-    })
-
+            cart_item.quantity = quantity
+            db.session.commit()
+            book = Book.query.get(book_id)
+            return jsonify({'success': True, 'quantity': cart_item.quantity, 'message': f'Книга "{book.title}" обновлена в корзине.'})
+    elif quantity > 0:
+        if book_location.quantity >= quantity:
+            cart_item = CartItem(cart_id=cart.id, book_id=book_id, quantity=quantity)
+            db.session.add(cart_item)
+            db.session.commit()
+            book = Book.query.get(book_id)
+            #return jsonify({'success': True, 'quantity': cart_item.quantity, 'message': f'Книга "{book.title}" добавлена в корзину.'})
+        else:
+            return jsonify({'success': False, 'error': 'Недостаточно экземпляров в наличии.'}), 400
+    return jsonify({'success': True, 'quantity': 0, 'message': 'Нет изменений в корзине.'})
 @app.route('/cart')
 def cart():
     if 'employee_id' not in session:
@@ -588,6 +606,19 @@ def update_cart(book_id):
         'price': float(book.price),
         'message': f'Количество книги "{book.title}" обновлено в корзине.'
     })
+@app.route('/cart_count')
+def cart_count():
+    if 'employee_id' not in session:
+        return jsonify({'success': True, 'count': 0})
+
+    employee_id = session['employee_id']
+    cart = Cart.query.filter_by(employee_id=employee_id, status='Активна').first()
+    if not cart:
+        return jsonify({'success': True, 'count': 0})
+
+    cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+    total_count = sum(item.quantity for item in cart_items) if cart_items else 0
+    return jsonify({'success': True, 'count': total_count})
 
 if __name__ == '__main__':
     with app.app_context():

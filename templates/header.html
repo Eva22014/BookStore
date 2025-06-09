@@ -236,14 +236,49 @@
         </div>
         <div class="icons">
           <div class="cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
-                <i class="fas fa-shopping-basket"></i> <!-- Изменил на shopping-basket для более красивого вида -->
-                <span class="cart-count">1</span>
+                <i class="fas fa-shopping-basket"></i>
+                <span class="cart-count" id="cart-count"></span>
             </div>
-
             <a href="{{ url_for('logout') }}" class="logout-button">
                 <i class="fas fa-sign-out-alt"></i> Выйти
             </a>
         </div>
     </div>
+    <script>
+        // Функция для обновления количества товаров в корзине
+        function updateCartCount() {
+            fetch('/cart_count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const cartCountElement = document.getElementById('cart-count');
+                        if (cartCountElement) {
+                            cartCountElement.textContent = data.count;
+                            cartCountElement.style.display = data.count > 0 ? 'flex' : 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching cart count:', error));
+        }
+
+        // Обновляем счетчик при загрузке страницы
+        document.addEventListener('DOMContentLoaded', updateCartCount);
+
+        // Создаем событие для обновления счетчика
+        document.addEventListener('cartUpdated', updateCartCount);
+
+        function updateCartCount() {
+            fetch('/cart_count')
+                .then(r => r.json())
+                .then(data => {
+                    const countEl = document.getElementById('cart-count');
+                    if (data.count > 0) {
+                        countEl.textContent = data.count;
+                        countEl.style.display = 'flex';
+                    } else {
+                        countEl.style.display = 'none';
+                    }
+                });
+    </script>
 </body>
 </html>
