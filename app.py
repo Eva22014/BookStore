@@ -105,13 +105,20 @@ class Location(db.Model):
     name = db.Column('Название', db.String(100), nullable=False)
     capacity = db.Column('Вместимость', db.Integer, nullable=False)
     location = db.Column('Местоположение', db.String(150), nullable=False)
-    location_type_id = db.Column('ID типа места хранения', db.Integer)
+    location_type_id = db.Column('ID типа места хранения', db.Integer,
+                                 db.ForeignKey('Тип_места_хранения.ID типа места хранения'))
+    location_type = db.relationship('LocationType', backref='locations')
 
 class BookAuthor(db.Model):
     __tablename__ = 'Книга_Автор'
     book_id = db.Column('ID книги', db.Integer, db.ForeignKey('Книга.ID книги'), primary_key=True)
     author_id = db.Column('ID автора', db.Integer, db.ForeignKey('Автор.ID автора'), primary_key=True)
     author = db.relationship('Author', backref='book_authors')
+
+class LocationType(db.Model):
+    __tablename__ = 'Тип_места_хранения'
+    id = db.Column('ID типа места хранения', db.Integer, primary_key=True)
+    name = db.Column('Название типа', db.String(100), nullable=False, unique=True)
 
 class BookGenre(db.Model):
     __tablename__ = 'Книга_Жанр'
@@ -135,6 +142,37 @@ class CartItem(db.Model):
     __table_args__ = (
         CheckConstraint('Количество > 0', name='check_quantity_positive'),
     )
+
+#***=== NEW: Added Reason model ===***
+class Reason(db.Model):
+    __tablename__ = 'Причина'
+    id = db.Column('ID причины', db.Integer, primary_key=True)
+    name = db.Column('Название причины', db.String(100), nullable=False, unique=True)
+#***=== NEW END ===***
+
+#***=== NEW: Added WriteOff model ===***
+class WriteOff(db.Model):
+    __tablename__ = 'Списание'
+    id = db.Column('ID списания', db.Integer, primary_key=True)
+    quantity = db.Column('Количество', db.Integer, nullable=False)
+    employee_id = db.Column('ID сотрудника', db.Integer, db.ForeignKey('Сотрудник.ID сотрудника'), nullable=False)
+    reason_id = db.Column('ID причины', db.Integer, db.ForeignKey('Причина.ID причины'), nullable=False)
+    date = db.Column('Дата списания', db.Date, nullable=False)
+    employee = db.relationship('Employee', backref='write_offs')
+    reason = db.relationship('Reason', backref='write_offs')
+    written_off_books = db.relationship('WrittenOffBook', backref='write_off_entry')
+#***=== NEW END ===***
+
+#***=== NEW: Added WrittenOffBook model ===***
+class WrittenOffBook(db.Model):
+    __tablename__ = 'Списанная книга'
+    book_id = db.Column('ID книги', db.Integer, db.ForeignKey('Книга.ID книги'), primary_key=True)
+    write_off_id = db.Column('ID списания', db.Integer, db.ForeignKey('Списание.ID списания'), primary_key=True)
+    quantity = db.Column('Количество', db.Integer, nullable=False)
+    book = db.relationship('Book', backref='written_off_entries')
+    write_off = db.relationship('WriteOff', backref='written_off_entries')
+#***=== NEW END ===***
+
 
 # === Маршруты ===
 @app.before_request
@@ -233,32 +271,250 @@ def show_books():
 
 @app.route('/book_info/<int:book_id>')
 def book_info(book_id):
+    app.logger.info(f"Book_info accessed for book {book_id}, session: {session.get('employee_id', 'None')}")
+    if 'employee_id' not in session:
+        app.logger.warning(f"Access denied to book_info, no session, redirecting to login")
+        flash("Пожалуйста, войдите в систему")
+        return redirect(url_for('login'))
+    try:
+        book = Book.query.options(
+            db.joinedload(Book.publisher),
+            db.joinedload(Book.theme),
+            db.joinedload(Book.book_authors).joinedload(BookAuthor.author),
+            db.joinedload(Book.book_genres).joinedload(BookGenre.genre),
+            #***=== CHANGED: Added joinedload for book_locations ===***
+            db.joinedload(Book.book_locations)
+            #***=== CHANGED END ===***
+        ).get_or_404(book_id)
+        authors = [f"{a.author.surname} {a.author.name} {a.author.patronymic or ''}".strip() for a in book.book_authors if a.author]
+        genres = [g.genre.name for g in book.book_genres if g.genre]
+        #***=== CHANGED: Updated quantity calculation to sum over all locations with None check ===***
+        quantity = sum(bl.quantity for bl in book.book_locations if bl.quantity is not None)
+        #***=== CHANGED END ===***
+        #***=== NEW: Added reasons for write-off functionality ===***
+        reasons = Reason.query.all()
+        #***=== NEW END ===***
+        #***=== NEW: Added current_date for date handling ===***
+        current_date = datetime.now().date()
+        #***=== NEW END ===***
+
+        book_data = {
+            "id": book.id,  #***=== NEW: Added id to book_data ===***
+            "title": book.title,
+            "price": float(book.price),
+            "image_url": book.image_url if book.image_url and book.image_url.startswith('images/') else None,
+            "theme": book.theme.name if book.theme else None,
+            "author": ", ".join(authors) if authors else None,
+            "genre": ", ".join(genres) if genres else None,
+            "quantity": quantity,
+            "publisher": book.publisher.name if book.publisher else None,
+            "description": book.description if book.description else "Описание отсутствует",
+            #***=== NEW: Added reasons to book_data ===***
+            "reasons": reasons,
+            #***=== NEW END ===***
+            "in_stock": quantity > 0
+        }
+        return render_template('book_info.html', book=book_data,
+                               #***=== NEW: Passed current_date to template ===***
+                               current_date=current_date)
+        #***=== NEW END ===***
+    except Exception as e:
+        #***=== CHANGED: Added exc_info=True for detailed error logging ===***
+        app.logger.error(f"Ошибка загрузки информации о книге: {str(e)}", exc_info=True)
+        #***=== CHANGED END ===***
+        flash("Произошла ошибка при загрузке данных")
+        return "Внутренняя ошибка сервера", 500
+
+@app.route('/book_write_off/<int:book_id>', methods=['GET', 'POST'])
+def book_write_off(book_id):
     if 'employee_id' not in session:
         flash("Пожалуйста, войдите в систему")
         return redirect(url_for('login'))
-    book = Book.query.get_or_404(book_id)
-    authors = [f"{a.author.surname} {a.author.name} {a.author.patronymic or ''}".strip() for a in book.book_authors if a.author]
-    genres = [g.genre.name for g in book.book_genres if g.genre]
-    quantity = BookLocation.query.filter_by(book_id=book.id).first().quantity if BookLocation.query.filter_by(book_id=book.id).first() else 0
-    book_data = {
-        "title": book.title,
-        "price": float(book.price),
-        "image_url": book.image_url if book.image_url and book.image_url.startswith('images/') else None,
-        "theme": book.theme.name if book.theme else None,
-        "author": ", ".join(authors) if authors else None,
-        "genre": ", ".join(genres) if genres else None,
-        "quantity": quantity,
-        "publisher": book.publisher.name if book.publisher else None,
-        "description": book.description if book.description else "Описание отсутствует"
-    }
-    return render_template('book_info.html', book=book_data)
+
+    book = Book.query.options(db.joinedload(Book.book_locations)).get_or_404(book_id)
+    total_quantity = sum(bl.quantity for bl in book.book_locations if bl.quantity is not None)
+    reasons = Reason.query.all()
+
+    if request.method == 'POST':
+        try:
+            write_off_quantity = int(request.form.get('quantity', 0))
+            reason_id = int(request.form.get('reason'))
+            write_off_date = datetime.strptime(request.form.get('date'), '%Y-%m-%d').date()
+
+            if write_off_quantity <= 0:
+                flash("Количество для списания должно быть положительным")
+                return redirect(url_for('book_info', book_id=book_id))
+
+            if write_off_quantity > total_quantity:
+                flash("Недостаточно книг для списания")
+                return redirect(url_for('book_info', book_id=book_id))
+
+            if write_off_date > datetime.now().date():
+                flash("Дата списания не может быть больше текущей даты")
+                return redirect(url_for('book_info', book_id=book_id))
+
+            remaining = write_off_quantity
+            for book_location in book.book_locations:
+                if remaining <= 0:
+                    break
+                if book_location.quantity > 0:
+                    amount_to_deduct = min(remaining, book_location.quantity)
+                    book_location.quantity -= amount_to_deduct
+                    remaining -= amount_to_deduct
+                    db.session.add(book_location)
+
+            employee_id = session.get('employee_id')
+            if employee_id is None:
+                raise ValueError("ID сотрудника не найден в сессии")
+
+            write_off = WriteOff(
+                quantity=write_off_quantity,
+                employee_id=employee_id,
+                reason_id=reason_id,
+                date=write_off_date
+            )
+            db.session.add(write_off)
+            db.session.flush()
+
+            written_off_book = WrittenOffBook(
+                book_id=book_id,
+                write_off_id=write_off.id,
+                quantity=write_off_quantity
+            )
+            db.session.add(written_off_book)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f"Книга успешно списана. Обновленное количество: {total_quantity - write_off_quantity}",
+                'redirect': url_for('book_info', book_id=book_id, _external=True)
+            })
+
+        except ValueError as e:
+            db.session.rollback()
+            app.logger.error(f"Некорректные данные при списании: {str(e)}", exc_info=True)
+            return jsonify({'success': False, 'message': 'Некорректные данные. Убедитесь, что введены правильные значения.'}), 400
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Ошибка при списании книги: {str(e)}", exc_info=True)
+            return jsonify({'success': False, 'message': f'Произошла ошибка при списании книги: {str(e)}'}), 500
+
+    return render_template('book_write_off_form.html',
+                           book=book,
+                           quantity=total_quantity,
+                           reasons=reasons,
+                           date=datetime.now().date())
+#***=== NEW END ===***
 
 @app.route('/shelf')
 def shelf():
+    app.logger.info(f"Shelf accessed, session: {session.get('employee_id', 'None')}, full session: {session}")
     if 'employee_id' not in session:
+        app.logger.warning(f"Access denied to shelf, no session, redirecting to login")
         flash("Пожалуйста, войдите в систему")
         return redirect(url_for('login'))
-    return render_template('shelf.html')
+    try:
+        locations = Location.query.all()
+        if not locations:
+            flash("Нет данных о стеллажах в базе данных")
+            return render_template('shelf.html', categories={})
+        categories = {}
+        for location in locations:
+            category = location.location if location.location else "Без категории"
+            if category not in categories:
+                categories[category] = []
+            categories[category].append({'name': location.name, 'id': location.id})
+        return render_template('shelf.html', categories=categories)  #***=== CHANGED: Updated to categorize locations and pass categories to template ===***
+    except Exception as e:
+        #***=== CHANGED: Added exc_info=True for detailed error logging ===***
+        app.logger.error(f"Ошибка загрузки стеллажей: {str(e)}", exc_info=True)
+        #***=== CHANGED END ===***
+        flash("Произошла ошибка при загрузке данных стеллажей")
+        return render_template('shelf.html', categories={})
+
+#***=== NEW: Added shelf_info route for detailed shelf information ===***
+@app.route('/shelf_info/<int:location_id>')
+def shelf_info(location_id):
+    app.logger.info(f"Shelf_info accessed for location {location_id}, session: {session.get('employee_id', 'None')}")
+    if 'employee_id' not in session:
+        app.logger.warning(f"Access denied to shelf_info, no session, redirecting to login")
+        flash("Пожалуйста, войдите в систему")
+        return redirect(url_for('login'))
+    try:
+        location = Location.query.options(db.joinedload(Location.location_type)).get(location_id)
+        if not location:
+            app.logger.error(f"Место хранения с ID {location_id} не найдено")
+            flash("Стеллаж не найден")
+            return redirect(url_for('shelf'))
+
+        location_data = {
+            'name': location.name,
+            'capacity': location.capacity,
+            'location': location.location,
+            'location_type': location.location_type.name if location.location_type else 'Не указано'
+        }
+
+        books_query = text('''
+            SELECT b."ID книги", b."Название", b."Цена", b."Изображение", bl."Количество экземпляров"
+            FROM "Книга" b
+            JOIN "Местоположение книги" bl ON b."ID книги" = bl."ID книги"
+            WHERE bl."ID места" = :location_id
+        ''')
+        books = db.session.execute(books_query, {'location_id': location_id}).fetchall()
+        if not books:
+            app.logger.warning(f"Нет книг для стеллажа с ID {location_id}")
+            books_data = []
+        else:
+            books_data = []
+            for book in books:
+                books_data.append({
+                    'id': book[0],
+                    'title': book[1],
+                    'price': float(book[2]) if book[2] else 0.0,
+                    'image_url': book[3] if book[3] and book[3].startswith('images/') else None,
+                    'quantity': book[4] if book[4] else 0
+                })
+
+        authors_query = text('''
+            SELECT DISTINCT a."ID автора", a."Фамилия" || ' ' || a."Имя" AS name
+            FROM "Автор" a
+            JOIN "Книга_Автор" ba ON a."ID автора" = ba."ID автора"
+            JOIN "Книга" b ON ba."ID книги" = b."ID книги"
+            JOIN "Местоположение книги" bl ON b."ID книги" = bl."ID книги"
+            WHERE bl."ID места" = :location_id
+        ''')
+        authors = db.session.execute(authors_query, {'location_id': location_id}).fetchall()
+        author_list = [{'id': a[0], 'name': a[1]} for a in authors] if authors else []
+
+        genres_query = text('''
+            SELECT DISTINCT g."ID жанра", g."Название жанра"
+            FROM "Жанр" g
+            JOIN "Книга_Жанр" bg ON g."ID жанра" = bg."ID жанра"
+            JOIN "Книга" b ON bg."ID книги" = b."ID книги"
+            JOIN "Местоположение книги" bl ON b."ID книги" = bl."ID книги"
+            WHERE bl."ID места" = :location_id
+        ''')
+        genres = db.session.execute(genres_query, {'location_id': location_id}).fetchall()
+        genre_list = [{'id': g[0], 'name': g[1]} for g in genres] if genres else []
+
+        themes_query = text('''
+            SELECT DISTINCT t."ID тематики", t."Название тематики"
+            FROM "Тематика" t
+            JOIN "Книга" b ON t."ID тематики" = b."ID тематики"
+            JOIN "Местоположение книги" bl ON b."ID книги" = bl."ID книги"
+            WHERE bl."ID места" = :location_id
+        ''')
+        themes = db.session.execute(themes_query, {'location_id': location_id}).fetchall()
+        theme_list = [{'id': t[0], 'name': t[1]} for t in themes] if themes else []
+
+        return render_template('shelf_info.html', location=location_data, books=books_data, authors=author_list, genres=genre_list, themes=theme_list)
+    except Exception as e:
+        #***=== CHANGED: Added exc_info=True for detailed error logging ===***
+        app.logger.error(f"Ошибка загрузки информации о месте хранения: {str(e)}", exc_info=True)
+        #***=== CHANGED END ===***
+        flash(f"Произошла ошибка при загрузке данных: {str(e)}")
+        return "Внутренняя ошибка сервера", 500
+#***=== NEW END ===***
 
 @app.route('/publisher')
 def show_publishers():

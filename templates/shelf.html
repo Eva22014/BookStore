@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sansation+Light&display=swap" rel="stylesheet">
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -111,41 +111,24 @@
     {% include 'header.html' %}
     <div class="container">
         <div class="shelves-container">
-            <div class="shelf-category">
-                <h2>Любовь и отношения</h2>
-                <ul class="shelf-list">
-                    <li><a href="#">Стеллаж 1</a></li>
-                    <li><a href="#">Стеллаж 2</a></li>
-                </ul>
-            </div>
-            <div class="shelf-category">
-                <h2>Социальные отношения</h2>
-                <ul class="shelf-list">
-                    <li><a href="#">Стеллаж 1</a></li>
-                    <li><a href="#">Стеллаж 2</a></li>
-                    <li><a href="#">Стеллаж 3</a></li>
-                </ul>
-            </div>
-            <div class="shelf-category">
-                <h2>Приключения</h2>
-                <ul class="shelf-list">
-                    <li><a href="#">Стеллаж 1</a></li>
-                    <li><a href="#">Стеллаж 2</a></li>
-                    <li><a href="#">Стеллаж 3</a></li>
-                </ul>
-            </div>
-            <div class="shelf-category">
-                <h2>Виртуна</h2>
-                <ul class="shelf-list">
-                    <li><a href="#">Стеллаж 1</a></li>
-                </ul>
-            </div>
-            <div class="shelf-category">
-                <h2>Склад</h2>
-                <ul class="shelf-list">
-                    <li><a href="#">Стеллаж 1</a></li>
-                </ul>
-            </div>
+            {% if categories %}
+                {% for category, shelves in categories.items() %}
+                <div class="shelf-category">
+                    <h2>{{ category }}</h2>
+                    <ul class="shelf-list">
+                        {% if shelves %}
+                            {% for shelf in shelves %}
+                            <li><a href="{{ url_for('shelf_info', location_id=shelf.id) }}">{{ shelf.name }}</a></li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Нет стеллажей в этой категории</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Нет данных о категориях или стеллажах.</p>
+            {% endif %}
             <button class="add-shelf-btn">+ Стеллаж</button>
         </div>
     </div>
