@@ -44,53 +44,38 @@
         </div>
         <!-- Боковая панель с фильтрами (справа) -->
         <div class="sidebar">
+            <div class="filter-header">
+                <h2 class="filter-title">Фильтры</h2>
+                <button class="clear-filters">Сбросить</button>
+            </div>
+
             <div class="filter-section">
                 <h2>Авторы</h2>
-                <ul class="filter-list">
-                    <li><label><input type="checkbox"> Островский</label></li>
-                    <li><label><input type="checkbox"> Пушкин</label></li>
-                    <li><label><input type="checkbox"> Дюма</label></li>
-                    <li><label><input type="checkbox"> Булгаков</label></li>
-                    <li><label><input type="checkbox"> Шукшин</label></li>
-                </ul>
+                <ul class="filter-list"></ul>
             </div>
+
             <div class="filter-section">
                 <h2>Жанры</h2>
-                <ul class="filter-list">
-                    <li><label><input type="checkbox"> Фантазия</label></li>
-                    <li><label><input type="checkbox"> Детектив</label></li>
-                    <li><label><input type="checkbox"> Биография</label></li>
-                    <li><label><input type="checkbox"> Ужасы</label></li>
-                    <li><label><input type="checkbox"> Роман</label></li>
-                </ul>
+                <ul class="filter-list"></ul>
             </div>
+
             <div class="filter-section">
                 <h2>Издательства</h2>
-                <ul class="filter-list">
-                    <li><label><input type="checkbox"> АСТ</label></li>
-                    <li><label><input type="checkbox"> Эксмо</label></li>
-                    <li><label><input type="checkbox"> Питер</label></li>
-                    <li><label><input type="checkbox"> Азбука</label></li>
-                    <li><label><input type="checkbox"> Росмен</label></li>
-                </ul>
+                <ul class="filter-list"></ul>
             </div>
+
             <div class="filter-section">
                 <h2>Тематики</h2>
-                <ul class="filter-list">
-                    <li><label><input type="checkbox"> Приключения</label></li>
-                    <li><label><input type="checkbox"> Тайны</label></li>
-                    <li><label><input type="checkbox"> Наука</label></li>
-                    <li><label><input type="checkbox"> Любовь</label></li>
-                    <li><label><input type="checkbox"> История</label></li>
-                </ul>
+                <ul class="filter-list"></ul>
             </div>
+
             <div class="price-section">
                 <h2>Цена</h2>
                 <div class="price-slider">
                     <div class="track"></div>
-                    <div class="range" style="left: 10%; right: 10%;"></div>
-                    <div class="thumb start" style="left: 10%;"></div>
-                    <div class="thumb end" style="right: 10%;"></div>
+                    <div class="range"></div>
+                    <div class="thumb start"></div>
+                    <div class="thumb end"></div>
                     <div class="labels">
                         <span>50 р</span>
                         <span>5799 р</span>
@@ -110,235 +95,394 @@
             <button class="modal-ok">OK</button>
         </div>
     </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let currentFilters = {
+        authors: [],
+        genres: [],
+        publishers: [],
+        themes: [],
+        price_min: 0,
+        price_max: 0
+    };
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Обработка кликов по книгам для перехода на страницу книги
-            $('.book-item').on('click', function(e) {
-                if (!$(e.target).closest('.cart-controls').length) {
-                    const bookId = $(this).data('book-id');
-                    window.location.href = `/book_info/${bookId}`;
-                }
-            });
+    let defaultPriceRange = { min: 0, max: 0 };
+    let debounceTimeout;
 
+    // Функция для отображения уведомления
+    function showNotification(message) {
+        $('#modalMessage').text(message);
+        $('#notificationModal').css('display', 'flex');
+        $('#notificationModal .modal-ok').focus();
+    }
 
+    // Закрытие модального окна
+    $('.modal-ok').on('click', function() {
+        $('#notificationModal').css('display', 'none');
+    });
 
+    // Закрытие модального окна при клике вне его
+    $(window).on('click', function(e) {
+        if (e.target === $('#notificationModal')[0]) {
+            $('#notificationModal').css('display', 'none');
+        }
+    });
 
-
-            // Функция обновления интерфейса корзины
-            function updateCartControls($controls, bookId, quantity) {
-                if (quantity === 0) {
-                    $controls.html('<button class="add-to-cart">В корзину</button>');
-                } else {
-                    $controls.html(`
-                        <div class="quantity-controls">
-                            <button class="decrease" data-action="decrease">-</button>
-                            <span class="quantity">${quantity}</span>
-                            <button class="increase" data-action="increase">+</button>
-                        </div>
-                    `);
-                }
-                $controls.data('quantity', quantity);
-                // Обновление счетчика в хедере
-                updateCartCount();
+    // Функция для инициализации обработчиков событий для книг и корзины
+    function initBookHandlers() {
+        $('.book-item').off('click').on('click', function(e) {
+            if (!$(e.target).closest('.cart-controls').length) {
+                const bookId = $(this).data('book-id');
+                window.location.href = `/book_info/${bookId}`;
             }
-
-            // Функция для обновления счетчика корзины в хедере
-            function updateCartCount() {
-                $.get('/cart_count')
-                    .done(function(data) {
-                        const cartCount = $('#cart-count');
-                        if (cartCount.length) {
-                            cartCount.text(data.count);
-                        }
-                    })
-                    .fail(function() {
-                        console.error('Ошибка при получении количества в корзине.');
-                    });
-            }
-
-            // Обработка добавления в корзину через делегирование
-            $('.cart-controls').on('click', '.add-to-cart', function(e) {
-                e.stopPropagation();
-                const $button = $(this);
-                const $controls = $button.closest('.cart-controls');
-                const bookId = $controls.data('book-id');
-                let quantity = parseInt($controls.data('quantity'));
-                const maxQuantity = parseInt($controls.data('max-quantity'));
-
-                if (quantity === 0) {
-                    $.post(`/add_to_cart/${bookId}`, { quantity: 1 })
-                        .done(function(response) {
-                            if (response.success) {
-                                quantity = 1;
-                                updateCartControls($controls, bookId, quantity);
-                            } else {
-                                showNotification(response.error || 'Ошибка при добавлении в корзину.');
-                            }
-                        })
-                        .fail(function() {
-                            showNotification('Ошибка при добавлении в корзину.');
-                        });
-                }
-            });
-
-            // Обработка изменения количества через делегирование
-            $('.cart-controls').on('click', '.quantity-controls button', function(e) {
-                e.stopPropagation();
-                const $button = $(this);
-                const $controls = $button.closest('.cart-controls');
-                const bookId = $controls.data('book-id');
-                let quantity = parseInt($controls.data('quantity'));
-                const maxQuantity = parseInt($controls.data('max-quantity'));
-
-                if ($button.data('action') === 'increase' && quantity < maxQuantity) {
-                    quantity++;
-                } else if ($button.data('action') === 'increase' && quantity >= maxQuantity) {
-                    showNotification('Нельзя добавить больше экземпляров, так как их больше нет в наличии.');
-                    return;
-                } else if ($button.data('action') === 'decrease' && quantity > 1) {
-                    quantity--;
-                } else if ($button.data('action') === 'decrease' && quantity === 1) {
-                    $.post(`/remove_from_cart/${bookId}`)
-                        .done(function(response) {
-                            if (response.success) {
-                                quantity = 0;
-                                updateCartControls($controls, bookId, quantity);
-                            } else {
-                                showNotification(response.error || 'Ошибка при удалении из корзины.');
-                            }
-                        })
-                        .fail(function() {
-                            showNotification('Ошибка при удалении из корзины.');
-                        });
-                    return;
-                }
-
-                if (quantity > 0) {
-                    $.post(`/add_to_cart/${bookId}`, { quantity: quantity })
-                        .done(function(response) {
-                            if (response.success) {
-                                updateCartControls($controls, bookId, quantity);
-                            } else {
-                                showNotification(response.error || 'Произошла ошибка при обновлении количества.');
-                            }
-                        })
-                        .fail(function() {
-                            showNotification('Произошла ошибка при обновлении количества.');
-                        });
-                }
-            });
-
-            // Инициализация: проверяем текущее количество в корзине при загрузке
-            $('.cart-controls').each(function() {
-                const $controls = $(this);
-                const bookId = $controls.data('book-id');
-                $.get(`/check_cart/${bookId}`)
-                    .done(function(response) {
-                        if (response.quantity > 0) {
-                            updateCartControls($controls, bookId, response.quantity);
-                        }
-                    })
-                    .fail(function() {
-                        console.log('Ошибка при проверке корзины.');
-                    });
-            });
-
-            // Восстановление открытия фильтров
-            document.querySelectorAll('.filter-section h2').forEach(header => {
-                header.addEventListener('click', () => {
-                    header.parentElement.classList.toggle('active');
-                });
-            });
-
-            // Функция для отображения уведомления
-            function showNotification(message) {
-                const modal = $('#notificationModal');
-                $('#modalMessage').text(message);
-                modal.css('display', 'flex');
-                modal.find('.modal-ok').focus();
-            }
-
-            // Закрытие модального окна
-            $('.modal-ok').on('click', function() {
-                $('#notificationModal').hide();
-            });
-
-            // Закрытие модального окна при клике вне его
-            $(window).on('click', function(e) {
-                const modal = $('#notificationModal');
-                if (e.target === modal[0]) {
-                    modal.hide();
-                }
-            });
-
-            // Инициализация счетчика корзины при загрузке страницы
-            updateCartCount();
         });
-        // Добавьте этот код в $(document).ready()
 
-                // Функция для загрузки и обновления фильтров
-                function loadFilters() {
-                    $.get('/get_filters')
-                        .done(function(response) {
-                            if (response.success) {
-                                const filters = response.filters;
+        $(document).off('click', '.cart-controls .add-to-cart').on('click', '.cart-controls .add-to-cart', function(e) {
+            e.stopPropagation();
+            const $button = $(this);
+            const $controls = $button.closest('.cart-controls');
+            const bookId = $controls.data('book-id');
+            let quantity = parseInt($controls.data('quantity')) || 0;
+            const maxQuantity = parseInt($controls.data('max-quantity'));
 
-                                // Обновляем фильтр авторов
-                                updateFilterList('.filter-section:nth-child(1) .filter-list', filters.authors);
-
-                                // Обновляем фильтр жанров
-                                updateFilterList('.filter-section:nth-child(2) .filter-list', filters.genres);
-
-                                // Обновляем фильтр издательств
-                                updateFilterList('.filter-section:nth-child(3) .filter-list', filters.publishers);
-
-                                // Обновляем фильтр тематик
-                                updateFilterList('.filter-section:nth-child(4) .filter-list', filters.themes);
-
-                                // Обновляем диапазон цен
-                                updatePriceRange(filters.price_range.min, filters.price_range.max);
-                            } else {
-                                showNotification(response.error || 'Ошибка при загрузке фильтров');
-                            }
-                        })
-                        .fail(function() {
-                            showNotification('Ошибка при загрузке фильтров');
-                        });
-                }
-
-                // Функция для обновления списка фильтров
-                function updateFilterList(selector, items) {
-                    const $list = $(selector);
-                    $list.empty(); // Очищаем текущий список
-
-                    items.forEach(item => {
-                        $list.append(`
-                            <li>
-                                <label>
-                                    <input type="checkbox" value="${item.id}">
-                                    ${item.name}
-                                </label>
-                            </li>
-                        `);
+            if (quantity === 0) {
+                $.post(`/add_to_cart/${bookId}`, { quantity: 1 })
+                    .done(function(response) {
+                        if (response.success) {
+                            quantity = 1;
+                            updateCartControls($controls, bookId, quantity);
+                        } else {
+                            showNotification(response.error || 'Ошибка при добавлении в корзину.');
+                        }
+                    })
+                    .fail(function() {
+                        showNotification('Ошибка при добавлении в корзину.');
                     });
+            }
+        });
+
+        $(document).off('click', '.cart-controls .quantity-controls button').on('click', '.cart-controls .quantity-controls button', function(e) {
+            e.stopPropagation();
+            const $button = $(this);
+            const $controls = $button.closest('.cart-controls');
+            const bookId = $controls.data('book-id');
+            let quantity = parseInt($controls.data('quantity')) || 0;
+            const maxQuantity = parseInt($controls.data('max-quantity'));
+
+            if ($button.data('action') === 'increase' && quantity < maxQuantity) {
+                quantity++;
+                $.post(`/add_to_cart/${bookId}`, { quantity: quantity })
+                    .done(function(response) {
+                        if (response.success) {
+                            updateCartControls($controls, bookId, quantity);
+                        } else {
+                            showNotification(response.error || 'Произошла ошибка при обновлении количества.');
+                        }
+                    })
+                    .fail(function() {
+                        showNotification('Произошла ошибка при обновлении количества.');
+                    });
+            } else if ($button.data('action') === 'increase' && quantity >= maxQuantity) {
+                showNotification('Нельзя добавить больше экземпляров, так как их больше нет в наличии.');
+                return;
+            } else if ($button.data('action') === 'decrease' && quantity > 1) {
+                quantity--;
+                $.post(`/add_to_cart/${bookId}`, { quantity: quantity })
+                    .done(function(response) {
+                        if (response.success) {
+                            updateCartControls($controls, bookId, quantity);
+                        } else {
+                            showNotification(response.error || 'Произошла ошибка при обновлении количества.');
+                        }
+                    })
+                    .fail(function() {
+                        showNotification('Произошла ошибка при обновлении количества.');
+                    });
+            } else if ($button.data('action') === 'decrease' && quantity === 1) {
+                $.post(`/remove_from_cart/${bookId}`)
+                    .done(function(response) {
+                        if (response.success) {
+                            quantity = 0;
+                            updateCartControls($controls, bookId, quantity);
+                        } else {
+                            showNotification(response.error || 'Ошибка при удалении из корзины.');
+                        }
+                    })
+                    .fail(function() {
+                        showNotification('Ошибка при удалении из корзины.');
+                    });
+                return;
+            }
+        });
+
+        $('.cart-controls').each(function() {
+            const $controls = $(this);
+            const bookId = $controls.data('book-id');
+            $.get(`/check_cart/${bookId}`)
+                .done(function(response) {
+                    if (response.quantity > 0) {
+                        updateCartControls($controls, bookId, response.quantity);
+                    }
+                })
+                .fail(function() {
+                    console.log('Ошибка при проверке корзины.');
+                });
+        });
+    }
+
+    // Функция обновления интерфейса корзины
+    function updateCartControls($controls, bookId, quantity) {
+        if (quantity === 0) {
+            $controls.html('<button class="add-to-cart">В корзину</button>');
+        } else {
+            $controls.html(`
+                <div class="quantity-controls">
+                    <button class="decrease" data-action="decrease">-</button>
+                    <span class="quantity">${quantity}</span>
+                    <button class="increase" data-action="increase">+</button>
+                </div>
+            `);
+        }
+        $controls.data('quantity', quantity);
+        updateCartCount();
+    }
+
+    // Функция для обновления счетчика корзины в хедере
+    function updateCartCount() {
+        $.get('/cart_count')
+            .done(function(data) {
+                const cartCount = $('#cart-count');
+                if (cartCount.length) {
+                    cartCount.text(data.count);
                 }
+            })
+            .fail(function() {
+                console.error('Ошибка при получении количества в корзине.');
+            });
+    }
 
-                // Функция для обновления диапазона цен
-                function updatePriceRange(min, max) {
-                    const $priceSlider = $('.price-slider');
-                    const $minLabel = $priceSlider.find('span:first');
-                    const $maxLabel = $priceSlider.find('span:last');
+    // Функция для загрузки фильтров
+    function loadFilters() {
+        $.get('/get_filters')
+            .done(function(response) {
+                if (response.success) {
+                    const filters = response.filters;
+                    defaultPriceRange = { min: filters.price_range.min, max: filters.price_range.max };
+                    currentFilters.price_min = filters.price_range.min;
+                    currentFilters.price_max = filters.price_range.max;
 
-                    $minLabel.text(`${min} р`);
-                    $maxLabel.text(`${max} р`);
+                    updateFilterList('.filter-section:nth-child(2) .filter-list', filters.authors, 'authors');
+                    updateFilterList('.filter-section:nth-child(3) .filter-list', filters.genres, 'genres');
+                    updateFilterList('.filter-section:nth-child(4) .filter-list', filters.publishers, 'publishers');
+                    updateFilterList('.filter-section:nth-child(5) .filter-list', filters.themes, 'themes');
 
-                    // Здесь можно добавить логику для обновления слайдера, если используется
+                    initPriceSlider(filters.price_range.min, filters.price_range.max);
+                } else {
+                    showNotification(response.error || 'Ошибка при загрузке фильтров');
                 }
+            })
+            .fail(function() {
+                showNotification('Ошибка при загрузке фильтров');
+            });
+    }
 
-                // Вызываем загрузку фильтров при загрузке страницы
-                loadFilters();
-    </script>
+    // Функция для обновления списка фильтров
+    function updateFilterList(selector, items, filterType) {
+        const $list = $(selector);
+        $list.empty();
+
+        items.forEach(item => {
+            $list.append(`
+                <li>
+                    <label>
+                        <input type="checkbox" value="${item.id}"
+                               ${currentFilters[filterType].includes(item.id) ? 'checked' : ''}>
+                        ${item.name}
+                    </label>
+                </li>
+            `);
+        });
+
+        $list.find('input[type="checkbox"]').off('change').on('change', function() {
+            const value = parseInt($(this).val());
+            if ($(this).is(':checked')) {
+                if (!currentFilters[filterType].includes(value)) {
+                    currentFilters[filterType].push(value);
+                }
+            } else {
+                currentFilters[filterType] = currentFilters[filterType].filter(id => id !== value);
+            }
+            applyFilters();
+        });
+    }
+
+    // Функция для инициализации ползунка цены
+    function initPriceSlider(min, max) {
+        const $slider = $('.price-slider');
+        const $range = $slider.find('.range');
+        const $startThumb = $slider.find('.thumb.start');
+        const $endThumb = $slider.find('.thumb.end');
+        const $labels = $slider.find('.labels span');
+
+        $labels.eq(0).text(`${Math.round(min)} р`);
+        $labels.eq(1).text(`${Math.round(max)} р`);
+
+        let isDragging = false;
+        let activeThumb = null;
+
+        function updateSlider() {
+            const startPercent = ((currentFilters.price_min - min) / (max - min)) * 100;
+            const endPercent = 100 - ((currentFilters.price_max - min) / (max - min)) * 100;
+
+            const thumbWidth = 18;
+            const sliderWidth = $slider.width();
+            const thumbOffset = (thumbWidth / sliderWidth) * 100;
+
+            $range.css({
+                'left': `${startPercent + thumbOffset / 2}%`,
+                'right': `${endPercent + thumbOffset / 2}%`
+            });
+            $startThumb.css('left', `${startPercent}%`);
+            $endThumb.css('right', `${endPercent}%`);
+
+            $labels.eq(0).text(`${Math.round(currentFilters.price_min)} р`);
+            $labels.eq(1).text(`${Math.round(currentFilters.price_max)} р`);
+        }
+
+        function handleMouseDown(e) {
+            isDragging = true;
+            activeThumb = $(e.target).hasClass('start') ? 'start' : 'end';
+            e.preventDefault();
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+
+            const sliderRect = $slider[0].getBoundingClientRect();
+            let percent = ((e.clientX - sliderRect.left) / sliderRect.width) * 100;
+            percent = Math.max(0, Math.min(100, percent));
+
+            if (activeThumb === 'start') {
+                const endPercent = 100 - parseFloat($range.css('right'));
+                if (percent >= endPercent - 1) percent = endPercent - 1;
+                currentFilters.price_min = min + (percent / 100) * (max - min);
+            } else {
+                const startPercent = parseFloat($range.css('left'));
+                if (percent <= startPercent + 1) percent = startPercent + 1;
+                currentFilters.price_max = max - ((100 - percent) / 100) * (max - min);
+            }
+
+            updateSlider();
+            applyFilters();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        $startThumb.off('mousedown').on('mousedown', handleMouseDown);
+        $endThumb.off('mousedown').on('mousedown', handleMouseDown);
+        $(document)
+            .off('mousemove').on('mousemove', handleMouseMove)
+            .off('mouseup').on('mouseup', handleMouseUp);
+
+        updateSlider();
+    }
+
+    // Функция для применения фильтров
+    function applyFilters() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            $.ajax({
+                url: '/filter_books',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    authors: currentFilters.authors,
+                    genres: currentFilters.genres,
+                    publishers: currentFilters.publishers,
+                    themes: currentFilters.themes,
+                    price_min: Math.round(currentFilters.price_min),
+                    price_max: Math.round(currentFilters.price_max)
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        updateBookGrid(response.books);
+                    } else {
+                        showNotification(response.error || 'Ошибка при фильтрации книг');
+                    }
+                },
+                error: function() {
+                    showNotification('Ошибка при фильтрации книг');
+                }
+            });
+        }, 300);
+    }
+
+    // Функция для обновления сетки книг
+    function updateBookGrid(books) {
+        const $bookGrid = $('#bookGrid');
+        $bookGrid.empty();
+
+        if (books.length === 0) {
+            $bookGrid.html('<div class="no-results">По вашему запросу ничего не найдено</div>');
+            return;
+        }
+
+        books.forEach(book => {
+            $bookGrid.append(`
+                <div class="book-item" data-book-id="${book.id}">
+                    <div class="book-item-content">
+                        ${book.image_url ? `
+                        <div class="book-image-container">
+                            <img class="book-image" src="${book.image_url}" alt="${book.title}">
+                        </div>` : ''}
+                        <div class="book-title">${book.title}</div>
+                        <div class="price">${book.price} ₽</div>
+                        ${book.in_stock ? `
+                        <div class="cart-controls" data-book-id="${book.id}" data-quantity="0" data-max-quantity="${book.quantity}">
+                            <button class="add-to-cart">В корзину</button>
+                        </div>` : `
+                        <div class="out-of-stock">Нет в наличии</div>
+                        <button class="add-to-cart" disabled>В корзину</button>`}
+                    </div>
+                </div>
+            `);
+        });
+
+        initBookHandlers();
+    }
+
+    // Обработка кнопки "Сбросить"
+    $('.clear-filters').on('click', function() {
+        currentFilters = {
+            authors: [],
+            genres: [],
+            publishers: [],
+            themes: [],
+            price_min: defaultPriceRange.min,
+            price_max: defaultPriceRange.max
+        };
+
+        $('.filter-list input[type="checkbox"]').prop('checked', false);
+        initPriceSlider(defaultPriceRange.min, defaultPriceRange.max);
+        applyFilters();
+    });
+
+    // Восстановление открытия фильтров
+    $(document).on('click', '.filter-section h2', function() {
+        $(this).parent().toggleClass('active');
+    });
+
+    // Обработка кнопки "Применить"
+    $('.apply-button').on('click', applyFilters);
+
+    // Инициализация
+    loadFilters();
+    initBookHandlers();
+    updateCartCount();
+});
+</script>
 </body>
 </html>
