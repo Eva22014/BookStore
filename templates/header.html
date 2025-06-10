@@ -339,13 +339,21 @@
             </div>
         </div>
         <div class="search-bar">
-            <div class="header-center">
+            <form class="header-center" action="{{ url_for('search_books') }}" method="get">
                 <div class="search-container">
-                    <input type="text" placeholder="Поиск">
+                    <input
+                        name="query"
+                        type="text"
+                        placeholder="Поиск книг по названию..."
+                        value="{{ search_query if search_query else '' }}"
+                        class="search-input"
+                        autocomplete="off"
+                    >
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </div>
-            </div>
+            </form>
         </div>
+
         <div class="icons">
             <div class="cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
                 <i class="fas fa-shopping-basket"></i>

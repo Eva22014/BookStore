@@ -136,6 +136,22 @@
                     `);
                 }
                 $controls.data('quantity', quantity);
+                // Обновление счетчика в хедере
+                updateCartCount();
+            }
+
+            // Функция для обновления счетчика корзины в хедере
+            function updateCartCount() {
+                $.get('/cart_count')
+                    .done(function(data) {
+                        const cartCount = $('#cart-count');
+                        if (cartCount.length) {
+                            cartCount.text(data.count);
+                        }
+                    })
+                    .fail(function() {
+                        console.error('Ошибка при получении количества в корзине.');
+                    });
             }
 
             // Обработка добавления в корзину через делегирование
@@ -153,7 +169,6 @@
                             if (response.success) {
                                 quantity = 1;
                                 updateCartControls($controls, bookId, quantity);
-
                             } else {
                                 showNotification(response.error || 'Ошибка при добавлении в корзину.');
                             }
@@ -186,7 +201,6 @@
                             if (response.success) {
                                 quantity = 0;
                                 updateCartControls($controls, bookId, quantity);
-
                             } else {
                                 showNotification(response.error || 'Ошибка при удалении из корзины.');
                             }
@@ -202,7 +216,6 @@
                         .done(function(response) {
                             if (response.success) {
                                 updateCartControls($controls, bookId, quantity);
-
                             } else {
                                 showNotification(response.error || 'Произошла ошибка при обновлении количества.');
                             }
@@ -255,32 +268,10 @@
                     modal.hide();
                 }
             });
+
+            // Инициализация счетчика корзины при загрузке страницы
+            updateCartCount();
         });
-                    // Вместо document.dispatchEvent просто вызываем функцию
-            function addToCart(bookId) {
-                fetch(`/add_to_cart/${bookId}`, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            updateCartCount(); // Просто вызываем функцию
-                            // остальная логика...
-                        }
-                    });
-            }
-
-            // Аналогично для удаления
-            function removeFromCart(bookId) {
-                fetch(`/remove_from_cart/${bookId}`, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            updateCartCount(); // Просто вызываем функцию
-                            // остальная логика...
-                        }
-                    });
-            }
-
     </script>
-
 </body>
 </html>

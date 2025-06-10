@@ -105,6 +105,20 @@
                 $('#error-modal').css('display', 'none');
             });
 
+            // Функция для обновления счетчика корзины в хедере
+            function updateCartCount() {
+                $.get('/cart_count')
+                    .done(function(data) {
+                        const cartCount = $('#cart-count');
+                        if (cartCount.length) {
+                            cartCount.text(data.count);
+                        }
+                    })
+                    .fail(function() {
+                        console.error('Ошибка при получении количества в корзине.');
+                    });
+            }
+
             // Функция для обновления интерфейса строки корзины
             function updateCartRow(bookId, quantity, price, subtotal) {
                 const $item = $(`.cart-item[data-book-id="${bookId}"]`);
@@ -112,6 +126,7 @@
                 $quantity.val(quantity);
                 $item.find('.item-subtotal').text(subtotal.toFixed(2) + ' ₽');
                 updateCartSummary();
+                updateCartCount();
             }
 
             // Функция для обновления итогов корзины
@@ -154,6 +169,7 @@
                                 if ($('.cart-item').length === 0) {
                                     $('.container').html('<h2>Корзина</h2><div>Корзина пуста.</div>');
                                 }
+                                updateCartCount();
                             } else {
                                 updateCartRow(bookId, response.quantity, price, response.quantity * price);
                             }
@@ -180,6 +196,7 @@
                             } else {
                                 updateCartSummary();
                             }
+                            updateCartCount();
                         } else {
                             showErrorModal(response.error || 'Ошибка при удалении из корзины.');
                         }
@@ -195,6 +212,7 @@
                     .done(function(response) {
                         if (response.success) {
                             $('.container').html('<h2>Корзина</h2><div>Корзина пуста.</div>');
+                            updateCartCount();
                         } else {
                             showErrorModal(response.error || 'Ошибка при очистке корзины.');
                         }
@@ -204,9 +222,10 @@
                     });
             };
 
-            // Инициализация итогов корзины
+            // Инициализация итогов корзины и счетчика корзины
             if ($('.cart-item').length > 0) {
                 updateCartSummary();
+                updateCartCount();
             }
         });
     </script>
