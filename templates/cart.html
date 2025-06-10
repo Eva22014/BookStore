@@ -79,11 +79,32 @@
                 </div>
             </div>
         {% endif %}
+
+        <!-- Модальное окно для ошибок -->
+        <div class="modal" id="error-modal">
+            <div class="modal-content">
+                <p id="error-message">Произошла ошибка при обновлении количества.</p>
+                <button class="modal-ok">OK</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Функция для показа модального окна
+            function showErrorModal(message) {
+                const $modal = $('#error-modal');
+                const $errorMessage = $('#error-message');
+                $errorMessage.text(message);
+                $modal.css('display', 'flex');
+            }
+
+            // Закрытие модального окна
+            $('.modal-ok').on('click', function() {
+                $('#error-modal').css('display', 'none');
+            });
+
             // Функция для обновления интерфейса строки корзины
             function updateCartRow(bookId, quantity, price, subtotal) {
                 const $item = $(`.cart-item[data-book-id="${bookId}"]`);
@@ -137,12 +158,12 @@
                                 updateCartRow(bookId, response.quantity, price, response.quantity * price);
                             }
                         } else {
-                            alert(response.error || 'Не удалось обновить количество. Проверьте соединение.');
+                            showErrorModal(response.error || 'Не удалось обновить количество. Проверьте соединение.');
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         console.error('Ошибка AJAX:', textStatus, errorThrown);
-                        alert('Не удалось обновить количество. Проверьте соединение.');
+                        showErrorModal('Не удалось обновить количество. Проверьте соединение.');
                     });
             });
 
@@ -160,11 +181,11 @@
                                 updateCartSummary();
                             }
                         } else {
-                            alert(response.error || 'Ошибка при удалении из корзины.');
+                            showErrorModal(response.error || 'Ошибка при удалении из корзины.');
                         }
                     })
                     .fail(function() {
-                        alert('Ошибка при удалении из корзины.');
+                        showErrorModal('Ошибка при удалении из корзины.');
                     });
             });
 
@@ -175,11 +196,11 @@
                         if (response.success) {
                             $('.container').html('<h2>Корзина</h2><div>Корзина пуста.</div>');
                         } else {
-                            alert(response.error || 'Ошибка при очистке корзины.');
+                            showErrorModal(response.error || 'Ошибка при очистке корзины.');
                         }
                     })
                     .fail(function() {
-                        alert('Ошибка при очистке корзины.');
+                        showErrorModal('Ошибка при очистке корзины.');
                     });
             };
 
