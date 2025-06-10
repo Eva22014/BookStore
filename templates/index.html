@@ -17,29 +17,29 @@
     <div class="container">
         <!-- Контейнер для списка книг (слева) -->
         <div class="book-container">
-            <h1 class="popular-title">ПОПУЛЯРНЫЕ</h1>
-            <div class="book-grid" id="bookGrid">
-                {% for book in books %}
-                <div class="book-item" data-book-id="{{ book.id }}">
-                    <div class="book-item-content">
-                        {% if book.image_url %}
-                        <div class="book-image">
-                            <img src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
-                        </div>
-                        {% endif %}
-                        <div class="book-title">{{ book.title }}</div>
-                        <div class="price">{{ book.price }} ₽</div>
-                        {% if book.in_stock %}
-                        <div class="cart-controls" data-book-id="{{ book.id }}" data-quantity="0" data-max-quantity="{{ book.quantity if book.quantity else 0 }}">
-                            <button class="add-to-cart">В корзину</button>
-                        </div>
-                        {% else %}
-                        <div class="out-of-stock">Нет в наличии</div>
-                        <button class="add-to-cart" disabled>В корзину</button>
-                        {% endif %}
-                    </div>
+                    <h1 class="popular-title">ПОПУЛЯРНЫЕ</h1>
+                    <div class="book-grid" id="bookGrid">
+                        {% for book in books %}
+                        <div class="book-item" data-book-id="{{ book.id }}">
+            <div class="book-item-content">
+                {% if book.image_url %}
+                <div class="book-image-container">
+                    <img class="book-image" src="{{ url_for('static', filename=book.image_url) }}" alt="{{ book.title }}">
                 </div>
-                {% endfor %}
+                {% endif %}
+                <div class="book-title">{{ book.title }}</div>
+                <div class="price">{{ book.price }} ₽</div>
+                {% if book.in_stock %}
+                <div class="cart-controls" data-book-id="{{ book.id }}" data-quantity="0" data-max-quantity="{{ book.quantity if book.quantity else 0 }}">
+                    <button class="add-to-cart">В корзину</button>
+                </div>
+                {% else %}
+                <div class="out-of-stock">Нет в наличии</div>
+                <button class="add-to-cart" disabled>В корзину</button>
+                {% endif %}
+            </div>
+        </div>
+                        {% endfor %}
             </div>
         </div>
         <!-- Боковая панель с фильтрами (справа) -->

@@ -1,7 +1,157 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
 {% include 'header.html' %}
 
-<h1>Оплата прошла успешно!</h1>
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-animation">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
 
-<div>
-    <a href="{{ url_for('show_books') }}">Вернуться на главную</a>
+        <h1 class="success-title">Оплата прошла успешно!</h1>
+
+
+        <a href="{{ url_for('show_books') }}" class="home-button">
+            Вернуться на главную
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+        </a>
+    </div>
 </div>
+
+<style>
+    :root {
+        --success-color: #4CAF50;
+        --dark-color: #2b2d42;
+        --border-radius: 16px;
+        --box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background-color: #f5f7fa;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .success-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 20px;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .success-animation {
+        margin: 0 auto 30px;
+        width: 100px;
+        height: 100px;
+    }
+
+    .checkmark__circle {
+        stroke-dasharray: 166;
+        stroke-dashoffset: 166;
+        stroke-width: 2;
+        stroke-miterlimit: 10;
+        stroke: var(--success-color);
+        fill: none;
+        animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    .checkmark__check {
+        transform-origin: 50% 50%;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        stroke: var(--success-color);
+        stroke-width: 3;
+        animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+
+    .success-title {
+        color: var(--dark-color);
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .success-message {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .home-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--success-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 16px;
+         margin-top: 20px;  /* Новое свойство - отступ сверху */
+    }
+
+    .home-button:hover {
+        background-color: #3d8b40;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .home-button svg {
+        margin-left: 8px;
+        width: 18px;
+        height: 18px;
+    }
+
+    @keyframes stroke {
+        100% {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .success-card {
+            padding: 30px 20px;
+        }
+
+        .success-title {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.success-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>

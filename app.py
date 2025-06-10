@@ -417,7 +417,6 @@ def cart():
         return redirect(url_for('login'))
     cart = Cart.query.filter_by(employee_id=session['employee_id'], status='Активна').first()
     if not cart:
-        flash('Ваша корзина пуста.', 'info')
         return render_template('cart.html', items=[])
     cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
     items = []
@@ -619,6 +618,50 @@ def cart_count():
     cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
     total_count = sum(item.quantity for item in cart_items) if cart_items else 0
     return jsonify({'success': True, 'count': total_count})
+
+
+@app.route('/search_books', methods=['GET'])
+@app.route('/search_books', methods=['GET'])
+def search_books():
+    if 'employee_id' not in session:
+        flash("Пожалуйста, войдите в систему")
+        return redirect(url_for('login'))
+
+    query = request.args.get('query', '').strip()
+
+    books_query = Book.query.options(
+        db.joinedload(Book.publisher),
+        db.joinedload(Book.theme),
+        db.joinedload(Book.book_authors).joinedload(BookAuthor.author),
+        db.joinedload(Book.book_genres).joinedload(BookGenre.genre)
+    )
+
+    if query:
+        books_query = books_query.filter(Book.title.ilike(f'%{query}%'))
+
+    books = books_query.all()
+    book_locations = {bl.book_id: bl.quantity for bl in BookLocation.query.all()}
+    books_data = []
+    for book in books:
+        authors = [f"{ba.author.surname} {ba.author.name}" for ba in book.book_authors]
+        genres = [bg.genre.name for bg in book.book_genres]
+        quantity = book_locations.get(book.id, 0)
+        books_data.append({
+            "id": book.id,
+            "title": book.title,
+            "price": float(book.price),
+            "in_stock": quantity > 0,
+            "authors": ", ".join(authors) if authors else "Не указан",
+            "genres": ", ".join(genres) if genres else "Не указан",
+            "publisher": book.publisher.name if book.publisher else "Не указан",
+            "description": book.description or "",
+            "image_url": book.image_url if book.image_url else None,
+            "quantity": quantity
+        })
+
+    return render_template('index.html', books=books_data, book_location=book_locations, search_query=query)
+
+
 
 if __name__ == '__main__':
     with app.app_context():

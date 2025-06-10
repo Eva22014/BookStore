@@ -60,12 +60,9 @@
 }
 
 .search-bar {
-    position: absolute;
-    left: 377px;
-    right: 324px;
-    top: 19px;
-    height: 49px;
+    flex: 1;
     display: flex;
+    justify-content: center;
     align-items: center;
 }
 
@@ -159,4 +156,59 @@
 .chip.active .label {
     color: #9747FF !important;
     font-weight: 700;
+}
+.search-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-container input {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px 0 0 20px;
+    width: 100%;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-container button {
+    background: #7A3ECC;
+    border: none;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+    color: var(--text-light);
+    padding: 8px 15px;
+    transition: background-color 0.2s;
+}
+
+.search-container button:hover {
+    background: #6a3ebc;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    width: 40%;
+}
+
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px;
+    }
+
+    .header-left, .header-center, .header-right {
+        width: 100%;
+        justify-content: center;
+        padding: 5px 0;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+    }
 }

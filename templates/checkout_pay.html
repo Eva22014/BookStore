@@ -1,35 +1,36 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
 {% include 'header.html' %}
 
 <div class="container">
-    <h1>Подтверждение продажи</h1>
+    <div class="confirmation-card">
+        <h1 class="confirmation-title">Подтверждение продажи</h1>
 
-    <div class="total-section">
-        Итого к оплате: <span id="total-price">{{ total }} ₽</span>
-    </div>
+        <div class="total-section">
+            <span class="total-label">Итого к оплате:</span>
+            <span class="total-amount">{{ total }} ₽</span>
+        </div>
 
-    <form id="payment-form">
-        <div class="payment-options">
-            <label>Способ оплаты:</label>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="payment-method" value="cash" checked> 💵 Наличные
-                </label>
-                <label>
-                    <input type="radio" name="payment-method" value="card"> 💳 Банковская карта
-                </label>
-                <label>
-                    <input type="radio" name="payment-method" value="sbp"> 📱 СБП (Система быстрых платежей)
-                </label>
-                <label>
-                    <input type="radio" name="payment-method" value="qr"> 🔳 QR-код
-                </label>
+        <div class="payment-section">
+            <label class="payment-label">Способ оплаты:</label>
+            <div class="custom-select">
+                <select id="payment-method" class="payment-select">
+                    <option value="cash">💵 Наличные</option>
+                    <option value="card">💳 Банковская карта</option>
+                    <option value="sbp">📱 СБП (Система быстрых платежей)</option>
+                    <option value="qr">🔳 QR-код</option>
+                </select>
+                <span class="select-arrow">▼</span>
             </div>
         </div>
-    </form>
 
-    <div class="actions">
-        <a href="{{ url_for('cart') }}" class="back-btn">← Вернуться в корзину</a>
-        <button id="confirm-sale" class="confirm-btn">✅ Подтвердить продажу</button>
+        <div class="action-buttons">
+            <a href="{{ url_for('cart') }}" class="back-button">
+                <span class="button-icon">←</span> Вернуться
+            </a>
+            <button id="confirm-sale" class="confirm-button">
+                <span class="button-icon">✓</span> Подтвердить продажу
+            </button>
+        </div>
     </div>
 </div>
 
@@ -37,7 +38,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('confirm-sale').addEventListener('click', async function () {
             try {
-                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                const paymentMethod = document.getElementById('payment-method').value;
                 const cartId = "{{ cart_id }}";
 
                 const response = await fetch("{{ url_for('process_payment') }}", {
@@ -88,58 +89,160 @@
 </script>
 
 <style>
-    .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
+    :root {
+        --primary-color: #4361ee;
+        --success-color: #4cc9f0;
+        --dark-color: #2b2d42;
+        --light-color: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
     }
 
-    .total-section {
-        font-size: 1.2em;
-        margin-bottom: 20px;
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background-color: #f5f7ff;
+        color: var(--dark-color);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .confirmation-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 30px;
+        transition: var(--transition);
+    }
+
+    .confirmation-title {
+        color: var(--dark-color);
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 25px;
         text-align: center;
     }
 
-    .payment-options {
-        margin-bottom: 20px;
-    }
-
-    .radio-group {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .radio-group label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .actions {
+    .total-section {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: var(--border-radius);
+        margin-bottom: 25px;
     }
 
-    .back-btn, .confirm-btn {
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 5px;
+    .total-label {
+        font-size: 16px;
+        color: #6c757d;
     }
 
-    .back-btn {
-        background-color: #f0f0f0;
-        color: #333;
+    .total-amount {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--primary-color);
     }
 
-    .confirm-btn {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
+    .payment-section {
+        margin-bottom: 30px;
+    }
+
+    .payment-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .custom-select {
+        position: relative;
+        width: 100%;
+    }
+
+    .payment-select {
+        width: 100%;
+        padding: 14px 20px;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        background-color: white;
+        font-size: 16px;
+        appearance: none;
         cursor: pointer;
+        transition: var(--transition);
     }
 
-    .confirm-btn:hover {
-        background-color: #45a049;
+    .payment-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .select-arrow {
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #6c757d;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .back-button, .confirm-button {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .back-button {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+
+    .back-button:hover {
+        background-color: #dee2e6;
+    }
+
+    .confirm-button {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .confirm-button:hover {
+        background-color: #3a56e8;
+        transform: translateY(-2px);
+    }
+
+    .button-icon {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    @media (max-width: 480px) {
+        .confirmation-card {
+            padding: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
     }
 </style>

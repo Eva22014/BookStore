@@ -87,6 +87,7 @@
             text-decoration: none;
         }
 
+        /* Обновленные стили для поисковой строки */
         .search-bar {
             position: absolute;
             left: 377px;
@@ -97,31 +98,37 @@
             align-items: center;
         }
 
-        .input-field {
-            width: 739px;
-            height: 38px;
-            background: #FFFFFF;
-            border: 1px solid #000000;
-            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
+        .search-container {
+            width: 100%;
+            position: relative;
         }
 
-        .input-field input {
-            flex: 1;
-            height: 36px;
-            padding: 6px 12px;
+        .search-input {
+            width: 100%;
+            height: 40px;
+            padding: 10px 20px 10px 45px;
             border: none;
-            font-family: 'Roboto', sans-serif;
+            border-radius: 30px;
+            font-family: 'Poppins', sans-serif;
             font-size: 16px;
-            line-height: 24px;
-            color: #596169;
-            opacity: 0.7;
+            color: #333;
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            outline: none;
         }
 
-        .input-field input:focus {
-            outline: none;
+        .search-input:focus {
+            box-shadow: 0 2px 20px rgba(151, 71, 255, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9747FF;
+            font-size: 18px;
         }
 
         .icons {
@@ -199,22 +206,124 @@
             font-size: 18px;
         }
 
+        @media (max-width: 1200px) {
+            .header {
+                padding: 0 30px;
+            }
+
+            .nav {
+                left: 30px;
+                gap: 15px;
+            }
+
+            .chip {
+                width: 100px;
+            }
+
+            .search-bar {
+                left: 250px;
+                right: 200px;
+            }
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 0 20px;
+                height: 70px;
             }
 
             .nav {
                 left: 20px;
+                top: 20px;
+                gap: 10px;
+            }
+
+            .chip {
+                width: 80px;
+                height: 25px;
+            }
+
+            .label {
+                font-size: 14px;
             }
 
             .search-bar {
-                left: 200px;
+                left: 150px;
                 right: 120px;
+                top: 15px;
+                height: 40px;
+            }
+
+            .search-input {
+                height: 35px;
+                padding-left: 35px;
+                font-size: 14px;
+            }
+
+            .search-icon {
+                left: 10px;
+                font-size: 16px;
             }
 
             .icons {
-                right: 20px;
+                right: 15px;
+                gap: 12px;
+            }
+
+            .logout-button {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+
+            .logout-button i {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0 10px;
+                height: 60px;
+            }
+
+            .nav {
+                left: 10px;
+                top: 15px;
+            }
+
+            .chip {
+                width: 60px;
+            }
+
+            .label {
+                font-size: 12px;
+            }
+
+            .search-bar {
+                left: 100px;
+                right: 80px;
+            }
+
+            .search-input {
+                padding-left: 30px;
+                font-size: 12px;
+            }
+
+            .search-icon {
+                font-size: 14px;
+            }
+
+            .cart-icon {
+                width: 30px;
+                height: 30px;
+            }
+
+            .cart-icon i {
+                font-size: 18px;
+            }
+
+            .logout-button span {
+                display: none;
             }
         }
     </style>
@@ -230,17 +339,21 @@
             </div>
         </div>
         <div class="search-bar">
-            <div class="input-field">
-                <input type="text" placeholder="Поиск">
+            <div class="header-center">
+                <div class="search-container">
+                    <input type="text" placeholder="Поиск">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </div>
             </div>
         </div>
         <div class="icons">
-          <div class="cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
+            <div class="cart-icon" onclick="window.location.href='{{ url_for('cart') }}'">
                 <i class="fas fa-shopping-basket"></i>
                 <span class="cart-count" id="cart-count"></span>
             </div>
             <a href="{{ url_for('logout') }}" class="logout-button">
-                <i class="fas fa-sign-out-alt"></i> Выйти
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Выйти</span>
             </a>
         </div>
     </div>
