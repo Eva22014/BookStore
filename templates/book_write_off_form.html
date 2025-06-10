@@ -105,5 +105,73 @@
             <button type="submit" class="submit">Списать</button>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelector('form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Предотвращаем стандартную отправку формы
+            const form = event.target;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Успешное списание',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'Продолжить',
+                        confirmButtonColor: '#9747FF',
+                        background: '#f8f9fa',
+                        customClass: {
+                            title: 'swal2-title-custom',
+                            content: 'swal2-content-custom',
+                            confirmButton: 'swal2-confirm-custom'
+                        }
+                    }).then(() => {
+                        window.location.href = result.redirect; // Перенаправление после закрытия
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: result.message,
+                        icon: 'error',
+                        confirmButtonText: 'ОК',
+                        confirmButtonColor: '#9747FF',
+                        background: '#f8f9fa'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Ошибка',
+                    text: 'Произошла ошибка при отправке формы.',
+                    icon: 'error',
+                    confirmButtonText: 'ОК',
+                    confirmButtonColor: '#9747FF',
+                    background: '#f8f9fa'
+                });
+            }
+        });
+    </script>
+    <style>
+        .swal2-title-custom {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            color: #333;
+        }
+        .swal2-content-custom {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+            color: #555;
+        }
+        .swal2-confirm-custom {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            border-radius: 4px;
+            padding: 10px 20px;
+        }
+    </style>
 </body>
 </html>

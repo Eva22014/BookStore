@@ -18,7 +18,6 @@
             --text-color: #212529;
         }
 
-
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -86,7 +85,7 @@
 
         .book-meta p {
             margin: 0;
-            font-size: 15px;
+            font-size: 18px;
         }
 
         .book-meta strong {
@@ -120,7 +119,7 @@
             padding: 12px 28px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(151, 71, 255, 0.2);
@@ -200,7 +199,7 @@
         }
 
         .description h2 {
-            font-size: 20px;
+            font-size: 22px;
             margin-top: 0;
             margin-bottom: 15px;
             color: var(--primary-color);
@@ -208,7 +207,7 @@
 
         .description p {
             margin: 0;
-            font-size: 15px;
+            font-size: 18px;
             color: var(--dark-gray);
         }
 
@@ -223,7 +222,7 @@
             padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 500;
             transition: all 0.3s ease;
         }
@@ -259,50 +258,69 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         .modal-content {
             background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 10% auto;
+            padding: 30px;
+            border: none;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin: 0 0 20px;
+            font-weight: 600;
+            text-align: center;
         }
 
         .modal-content label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 18px;
             font-weight: 500;
+            color: var(--dark-gray);
         }
 
-        .modal-content input, .modal-content select {
+        .modal-content input,
+        .modal-content select {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
             box-sizing: border-box;
+            font-size: 18px;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
         }
 
         .modal-content button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 18px;
             font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .modal-content .cancel {
-            background-color: #ccc;
+            background-color: var(--medium-gray);
             color: #fff;
+            margin-right: 10px;
         }
 
         .modal-content .cancel:hover {
-            background-color: #bbb;
+            background-color: #adb5bd;
         }
 
         .modal-content .submit {
@@ -312,6 +330,7 @@
 
         .modal-content .submit:hover {
             background-color: var(--primary-hover);
+            box-shadow: 0 4px 8px rgba(151, 71, 255, 0.2);
         }
 
         /* Стили для модального окна с сообщением */
@@ -324,41 +343,60 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         .success-modal-content {
             background-color: #fff;
             margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+            padding: 30px;
+            border: none;
+            width: 90%;
             max-width: 400px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-height: 80vh; /* Ограничение максимальной высоты */
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             text-align: center;
+            animation: slideIn 0.3s ease-in-out;
         }
 
         .success-modal-content p {
-            margin: 0 0 15px;
-            color: #721c24;
-            background-color: #f8d7da;
-            padding: 10px;
-            border-radius: 4px;
+            margin: 0 0 20px;
+            font-size: 18px;
+            color: #155724;
+            font-weight: 500;
+            background-color: #d4edda;
+            padding: 12px;
+            border-radius: 6px;
         }
 
         .success-modal-content button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             background-color: var(--primary-color);
             color: #fff;
+            font-size: 18px;
             font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .success-modal-content button:hover {
             background-color: var(--primary-hover);
+            box-shadow: 0 4px 8px rgba(151, 71, 255, 0.2);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* Адаптивность */
@@ -392,6 +430,22 @@
 
             .action-buttons {
                 justify-content: center;
+            }
+
+            .modal-content,
+            .success-modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-content h2,
+            .modal-content label,
+            .modal-content input,
+            .modal-content select,
+            .modal-content button,
+            .success-modal-content p,
+            .success-modal-content button {
+                font-size: 16px;
             }
         }
 
@@ -489,21 +543,21 @@
     <div id="writeOffModal" class="modal">
         <div class="modal-content">
             <form id="writeOffForm" method="POST" action="{{ url_for('book_write_off', book_id=book.id) }}">
+                <h2>Списание книги</h2>
                 <label for="quantity">Количество:</label>
                 <input type="number" id="quantity" name="quantity" min="1" max="{{ book.quantity }}" required>
-
                 <label for="reason">Причина списания:</label>
                 <select id="reason" name="reason" required>
                     {% for reason in book.reasons %}
                         <option value="{{ reason.id }}">{{ reason.name }}</option>
                     {% endfor %}
                 </select>
-
                 <label for="date">Дата:</label>
                 <input type="date" id="date" name="date" max="{{ current_date }}" value="{{ current_date }}" required>
-
-                <button type="button" class="cancel" onclick="closeModal()">Отменить</button>
-                <button type="submit" class="submit">Списать</button>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="cancel" onclick="closeModal()">Отменить</button>
+                    <button type="submit" class="submit">Списать</button>
+                </div>
             </form>
         </div>
     </div>
@@ -512,7 +566,7 @@
     <div id="successModal" class="success-modal">
         <div class="success-modal-content">
             <p id="successMessage"></p>
-            <button class="modal-ok">OK</button>
+            <button class="modal-ok">ОК</button>
         </div>
     </div>
 

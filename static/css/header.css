@@ -170,9 +170,9 @@
     border: none;
     border-radius: 20px 0 0 20px;
     width: 100%;
-    font-size: 14px;
+    font-size: 18px;
     outline: none;
-    height: 25px;
+    height: 35px;
 }
 
 .search-container button {
@@ -183,7 +183,7 @@
     color: var(--text-light);
     padding: 8px 15px;
     transition: background-color 0.2s;
-    height: 42px;
+    height: 52px;
 }
 
 .search-container button:hover {

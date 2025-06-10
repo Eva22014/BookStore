@@ -589,16 +589,58 @@ def edit_publisher(publisher_id):
         return redirect(url_for('show_publishers'))
     return render_template('edit_publisher.html', publisher=publisher)
 
-@app.route('/publisher/delete/<int:publisher_id>')
+
+from flask import jsonify
+
+
+@app.route('/publisher/delete/<int:publisher_id>', methods=['POST'])
 def delete_publisher(publisher_id):
-    if 'employee_id' not in session or session.get('position') != 'Системный администратор':
-        flash("У вас нет прав для доступа к этой странице")
-        return redirect(url_for('show_books' if 'employee_id' in session else 'login'))
-    publisher = Publisher.query.get_or_404(publisher_id)
-    db.session.delete(publisher)
-    db.session.commit()
-    flash("Издательство успешно удалено")
-    return redirect(url_for('show_publishers'))
+    try:
+        app.logger.info(f"Attempting to delete publisher {publisher_id}")
+
+        # Проверка прав
+        if 'employee_id' not in session or session.get('position') != 'Системный администратор':
+            app.logger.warning("Unauthorized delete attempt")
+            return jsonify({
+                'success': False,
+                'error': 'У вас нет прав для выполнения этой операции'
+            }), 403
+
+        publisher = Publisher.query.get(publisher_id)
+        if not publisher:
+            app.logger.warning(f"Publisher {publisher_id} not found")
+            return jsonify({
+                'success': False,
+                'error': 'Издательство не найдено'
+            }), 404
+
+        # Проверка на наличие связанных книг
+        book_count = Book.query.filter_by(publisher_id=publisher_id).count()
+        app.logger.info(f"Found {book_count} books for publisher {publisher_id}")
+
+        if book_count > 0:
+            return jsonify({
+                'success': False,
+                'error': f'Невозможно удалить издательство, так как с ним связано {book_count} книг(и)'
+            }), 400
+
+        # Удаление
+        db.session.delete(publisher)
+        db.session.commit()
+        app.logger.info(f"Publisher {publisher_id} deleted successfully")
+
+        return jsonify({
+            'success': True,
+            'message': 'Издательство успешно удалено.'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error deleting publisher: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Произошла ошибка при удалении: {str(e)}'
+        }), 500
 
 @app.route('/genre')
 def show_genres():

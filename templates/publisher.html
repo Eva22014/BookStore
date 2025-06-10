@@ -27,15 +27,148 @@
                        class="btn btn-edit">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <a href="{{ url_for('delete_publisher', publisher_id=publisher.id) }}"
-                       class="btn btn-delete"
-                       onclick="return confirm('Вы уверены?')">
+                    <button class="btn btn-delete" data-publisher-id="{{ publisher.id }}"
+                            data-publisher-name="{{ publisher.name }}">
                         <i class="fas fa-trash-alt"></i>
-                    </a>
+                    </button>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<!-- Модальное окно для подтверждения и ошибок -->
+<div id="modalConfirm" class="modal">
+    <div class="modal-content">
+        <p id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button id="modalOk" class="modal-ok">OK</button>
+            <button id="modalCancel" class="modal-cancel">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #modalMessage {
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-family: 'Poppins', sans-serif;
+        color: #333;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .modal-ok, .modal-cancel {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .modal-ok {
+        background: #9747FF;
+        color: #fff;
+    }
+
+    .modal-ok:hover {
+        background: #7a3dcc;
+    }
+
+    .modal-cancel {
+        background: #ccc;
+        color: #333;
+    }
+
+    .modal-cancel:hover {
+        background: #bbb;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+   $(document).ready(function() {
+        // Показать модальное окно
+        function showModal(message, showCancel = true, callback = null) {
+            $('#modalMessage').text(message);
+            $('#modalCancel').toggle(showCancel);
+            $('#modalConfirm').css('display', 'flex');
+            $('#modalOk').off('click').on('click', function() {
+                $('#modalConfirm').css('display', 'none');
+                if (callback) callback();
+            });
+            $('#modalCancel').off('click').on('click', function() {
+                $('#modalConfirm').css('display', 'none');
+            });
+            $('#modalOk').focus();
+        }
+
+        // Обработка клика по кнопке удаления
+        $('.btn-delete').on('click', function() {
+                const publisherId = $(this).data('publisher-id');
+                const publisherName = $(this).data('publisher-name');
+
+                console.log(`Delete button clicked for publisher ${publisherId}`); // Добавьте эту строку
+
+                showModal(`Вы уверены, что хотите удалить издательство "${publisherName}"?`, true, function() {
+                    console.log(`Sending delete request for publisher ${publisherId}`); // И эту
+
+                    $.ajax({
+                        url: `/publisher/delete/${publisherId}`,
+                        method: 'POST',
+                        dataType: 'json',
+                        success: function(response) {
+                            console.log('Delete response:', response); // И эту
+                            if (response.success) {
+                                showModal(response.message, false, function() {
+                                    window.location.reload();
+                                });
+                            } else {
+                                showModal(response.error, false);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Delete error:', xhr.responseText); // И эту
+                            const errorMsg = xhr.responseJSON?.error || 'Произошла ошибка при удалении';
+                            showModal(errorMsg, false);
+                        }
+                    });
+                });
+            });
+        // Закрытие модального окна при клике вне его
+        $(window).on('click', function(e) {
+            if (e.target === $('#modalConfirm')[0]) {
+                $('#modalConfirm').css('display', 'none');
+            }
+        });
+    });
+</script>
 {% endblock %}
