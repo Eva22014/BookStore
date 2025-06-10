@@ -3,18 +3,145 @@
 {% block title %}Добавить издательство{% endblock %}
 
 {% block body %}
+<style>
+    /* Основные стили формы */
+    .form-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(151, 71, 255, 0.1);
+        border: 1px solid rgba(151, 71, 255, 0.2);
+    }
+
+    .form-container h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-container h2 i {
+        color: #9747FF;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 8px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 14px 16px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        color: #333;
+        background: #FFFFFF;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+        border-color: #9747FF;
+        box-shadow: 0 0 0 3px rgba(151, 71, 255, 0.2);
+        outline: none;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-save {
+        background: #9747FF;
+        color: #FFFFFF;
+        border: none;
+    }
+
+    .btn-save:hover {
+        background: #7a39d5;
+        transform: translateY(-2px);
+    }
+
+    .btn-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        background: #FFFFFF;
+        color: #666;
+        border: 1px solid #ddd;
+    }
+
+    .btn-cancel:hover {
+        background: #f5f5f5;
+        border-color: #ccc;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
 <div class="form-container">
-    <h2><i class="fas fa-plus"></i> Добавить издательство</h2>
+    <h2><i class="fas fa-plus-circle"></i> Добавить издательство</h2>
     <form method="POST" action="{{ url_for('add_publisher') }}">
         <div class="form-group">
-            <label for="name">Название *</label>
-            <input type="text" id="name" name="name" required>
+            <label for="name">Название издательства *</label>
+            <input type="text" id="name" name="name" required placeholder="Введите название издательства">
         </div>
         <div class="form-actions">
+            <a href="{{ url_for('show_publishers') }}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Отмена
+            </a>
             <button type="submit" class="btn btn-save">
                 <i class="fas fa-save"></i> Сохранить
             </button>
-            <a href="{{ url_for('show_publishers') }}" class="btn btn-cancel">Отмена</a>
         </div>
     </form>
 </div>

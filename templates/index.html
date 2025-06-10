@@ -45,7 +45,7 @@
         <!-- Боковая панель с фильтрами (справа) -->
         <div class="sidebar">
             <div class="filter-section">
-                <h2>Авторы<span>Показать все</span></h2>
+                <h2>Авторы</h2>
                 <ul class="filter-list">
                     <li><label><input type="checkbox"> Островский</label></li>
                     <li><label><input type="checkbox"> Пушкин</label></li>
@@ -55,7 +55,7 @@
                 </ul>
             </div>
             <div class="filter-section">
-                <h2>Жанры<span>Показать все</span></h2>
+                <h2>Жанры</h2>
                 <ul class="filter-list">
                     <li><label><input type="checkbox"> Фантазия</label></li>
                     <li><label><input type="checkbox"> Детектив</label></li>
@@ -65,7 +65,7 @@
                 </ul>
             </div>
             <div class="filter-section">
-                <h2>Издательства<span>Показать все</span></h2>
+                <h2>Издательства</h2>
                 <ul class="filter-list">
                     <li><label><input type="checkbox"> АСТ</label></li>
                     <li><label><input type="checkbox"> Эксмо</label></li>
@@ -75,7 +75,7 @@
                 </ul>
             </div>
             <div class="filter-section">
-                <h2>Тематики<span>Показать все</span></h2>
+                <h2>Тематики</h2>
                 <ul class="filter-list">
                     <li><label><input type="checkbox"> Приключения</label></li>
                     <li><label><input type="checkbox"> Тайны</label></li>
@@ -121,6 +121,10 @@
                     window.location.href = `/book_info/${bookId}`;
                 }
             });
+
+
+
+
 
             // Функция обновления интерфейса корзины
             function updateCartControls($controls, bookId, quantity) {
@@ -272,6 +276,69 @@
             // Инициализация счетчика корзины при загрузке страницы
             updateCartCount();
         });
+        // Добавьте этот код в $(document).ready()
+
+                // Функция для загрузки и обновления фильтров
+                function loadFilters() {
+                    $.get('/get_filters')
+                        .done(function(response) {
+                            if (response.success) {
+                                const filters = response.filters;
+
+                                // Обновляем фильтр авторов
+                                updateFilterList('.filter-section:nth-child(1) .filter-list', filters.authors);
+
+                                // Обновляем фильтр жанров
+                                updateFilterList('.filter-section:nth-child(2) .filter-list', filters.genres);
+
+                                // Обновляем фильтр издательств
+                                updateFilterList('.filter-section:nth-child(3) .filter-list', filters.publishers);
+
+                                // Обновляем фильтр тематик
+                                updateFilterList('.filter-section:nth-child(4) .filter-list', filters.themes);
+
+                                // Обновляем диапазон цен
+                                updatePriceRange(filters.price_range.min, filters.price_range.max);
+                            } else {
+                                showNotification(response.error || 'Ошибка при загрузке фильтров');
+                            }
+                        })
+                        .fail(function() {
+                            showNotification('Ошибка при загрузке фильтров');
+                        });
+                }
+
+                // Функция для обновления списка фильтров
+                function updateFilterList(selector, items) {
+                    const $list = $(selector);
+                    $list.empty(); // Очищаем текущий список
+
+                    items.forEach(item => {
+                        $list.append(`
+                            <li>
+                                <label>
+                                    <input type="checkbox" value="${item.id}">
+                                    ${item.name}
+                                </label>
+                            </li>
+                        `);
+                    });
+                }
+
+                // Функция для обновления диапазона цен
+                function updatePriceRange(min, max) {
+                    const $priceSlider = $('.price-slider');
+                    const $minLabel = $priceSlider.find('span:first');
+                    const $maxLabel = $priceSlider.find('span:last');
+
+                    $minLabel.text(`${min} р`);
+                    $maxLabel.text(`${max} р`);
+
+                    // Здесь можно добавить логику для обновления слайдера, если используется
+                }
+
+                // Вызываем загрузку фильтров при загрузке страницы
+                loadFilters();
     </script>
 </body>
 </html>

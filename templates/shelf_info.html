@@ -159,7 +159,7 @@
             color: white;
             border: none;
             border-radius: 4px; /* Точь-в-точь как в index.css */
-            font-family: 'Poppins';
+            font-family: 'Poppins', sans-serif;
             font-weight: 500; /* Точь-в-точь как в index.css */
             font-size: 18px; /* Точь-в-точь как в index.css */
             cursor: pointer;
@@ -396,7 +396,7 @@
             {% if books %}
                 <div class="book-grid">
                     {% for book in books %}
-                        <div class="book-item">
+                        <div class="book-item" data-book-id="{{ book.id }}">
                             <div class="book-item-content">
                                 <div class="book-image-container">
                                     {% if book.image_url %}
@@ -436,7 +436,35 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+<script>
+            $(document).ready(function() {
+                // Обработка кликов по книгам для перехода на страницу книги
+                $('.book-item').on('click', function(e) {
+                    if (!$(e.target).closest('.cart-controls').length) {
+                        const bookId = $(this).data('book-id');
+                        window.location.href = `/book_info/${bookId}`;
+                    }
+                });
+
+                // Предотвращаем переход при клике на cart-controls
+                $('.cart-controls').on('click', function(e) {
+                    e.stopPropagation();
+                });
+
+                // Debounce функция
+                function debounce(func, wait) {
+                    let timeout;
+                    return function executedFunction(...args) {
+                        const later = () => {
+                            clearTimeout(timeout);
+                            func(...args);
+                        };
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                    };
+                }
+            });
+
         $(document).ready(function() {
             // Функция обновления интерфейса корзины
             function updateCartControls($controls, bookId, quantity) {

@@ -239,18 +239,22 @@ def employee_detail(employee_id):
         return redirect(url_for('show_employees'))
     return render_template('employee_detail.html', employee=employee)
 
+
 @app.route('/index')
 def show_books():
     if 'employee_id' not in session:
         return redirect(url_for('login'))
+
+    # Запрос книг
     books = Book.query.options(
         db.joinedload(Book.publisher),
         db.joinedload(Book.theme),
         db.joinedload(Book.book_authors).joinedload(BookAuthor.author),
         db.joinedload(Book.book_genres).joinedload(BookGenre.genre)
     ).all()
-    books_data = []
+
     book_locations = {bl.book_id: bl.quantity for bl in BookLocation.query.all()}
+    books_data = []
     for book in books:
         authors = [f"{ba.author.surname} {ba.author.name}" for ba in book.book_authors]
         genres = [bg.genre.name for bg in book.book_genres]
@@ -267,7 +271,34 @@ def show_books():
             "image_url": book.image_url if book.image_url else None,
             "quantity": quantity
         })
-    return render_template('index.html', books=books_data, book_location=book_locations)
+
+    # Данные для фильтров
+    authors = Author.query.order_by(Author.surname).all()
+    genres = Genre.query.order_by(Genre.name).all()
+    publishers = Publisher.query.order_by(Publisher.name).all()
+    themes = Theme.query.order_by(Theme.name).all()
+
+    # Диапазон цен
+    price_range = db.session.query(
+        db.func.min(Book.price), db.func.max(Book.price)
+    ).first()
+    min_price = float(price_range[0]) if price_range[0] else 0.0
+    max_price = float(price_range[1]) if price_range[1] else 10000.0
+
+    return render_template(
+        'index.html',
+        books=books_data,
+        book_location=book_locations,
+        authors=authors,
+        genres=genres,
+        publishers=publishers,
+        themes=themes,
+        min_price=min_price,
+        max_price=max_price
+    )
+
+
+
 
 @app.route('/book_info/<int:book_id>')
 def book_info(book_id):
@@ -876,7 +907,7 @@ def cart_count():
     return jsonify({'success': True, 'count': total_count})
 
 
-@app.route('/search_books', methods=['GET'])
+
 @app.route('/search_books', methods=['GET'])
 def search_books():
     if 'employee_id' not in session:
@@ -918,6 +949,129 @@ def search_books():
     return render_template('index.html', books=books_data, book_location=book_locations, search_query=query)
 
 
+from sqlalchemy import text, func
+from sqlalchemy import text, String, cast
+@app.route('/get_filters')
+def get_filters():
+    try:
+        # Получаем уникальных авторов (сортировка по фамилии)
+
+        authors = db.session.query(
+            Author.id.label('id'),
+            func.concat(Author.surname, ' ', Author.name).label('name'),
+            Author.surname  # Добавляем для корректной сортировки
+        ).distinct().order_by(Author.surname).all()
+
+        # Получаем уникальные жанры (сортировка по названию)
+        genres = db.session.query(
+            Genre.id.label('id'),
+            Genre.name.label('name')
+        ).distinct().order_by(Genre.name).all()
+
+        # Получаем уникальные издательства (сортировка по названию)
+        publishers = db.session.query(
+            Publisher.id.label('id'),
+            Publisher.name.label('name')
+        ).distinct().order_by(Publisher.name).all()
+
+        # Получаем уникальные тематики (сортировка по названию)
+        themes = db.session.query(
+            Theme.id.label('id'),
+            Theme.name.label('name')
+        ).distinct().order_by(Theme.name).all()
+
+        # Получаем диапазон цен
+        price_range = db.session.query(
+            func.min(Book.price),
+            func.max(Book.price)
+        ).first()
+
+        # Формируем ответ
+        return jsonify({
+            'success': True,
+            'filters': {
+                'authors': [{'id': a.id, 'name': a.name} for a in authors],
+                'genres': [{'id': g.id, 'name': g.name} for g in genres],
+                'publishers': [{'id': p.id, 'name': p.name} for p in publishers],
+                'themes': [{'id': t.id, 'name': t.name} for t in themes],
+                'price_range': {
+                    'min': float(price_range[0]) if price_range[0] else 0,
+                    'max': float(price_range[1]) if price_range[1] else 10000
+                }
+            }
+        })
+    except Exception as e:
+        app.logger.error(f"Ошибка при получении фильтров: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Произошла ошибка при загрузке фильтров'
+        }), 500
+
+
+@app.route('/filter_books', methods=['POST'])
+def filter_books():
+    try:
+        filters = request.get_json()
+
+        # Базовый запрос с JOIN для всех связанных таблиц
+        query = db.session.query(Book).options(
+            db.joinedload(Book.publisher),
+            db.joinedload(Book.theme),
+            db.joinedload(Book.book_authors).joinedload(BookAuthor.author),
+            db.joinedload(Book.book_genres).joinedload(BookGenre.genre),
+            db.joinedload(Book.book_locations)
+        )
+
+        # Фильтрация по авторам
+        if filters.get('authors'):
+            query = query.join(Book.book_authors).filter(
+                BookAuthor.author_id.in_(filters['authors'])
+            )
+
+        # Фильтрация по жанрам
+        if filters.get('genres'):
+            query = query.join(Book.book_genres).filter(
+                BookGenre.genre_id.in_(filters['genres'])
+            )
+
+        # Фильтрация по издательствам
+        if filters.get('publishers'):
+            query = query.filter(
+                Book.publisher_id.in_(filters['publishers'])
+            )
+
+        # Фильтрация по тематикам
+        if filters.get('themes'):
+            query = query.filter(
+                Book.theme_id.in_(filters['themes'])
+            )
+
+        # Фильтрация по цене
+        price_min = float(filters.get('price_min', 0))
+        price_max = float(filters.get('price_max', 10000))
+        query = query.filter(Book.price.between(price_min, price_max))
+
+        books = query.all()
+
+        # Формируем результат
+        books_data = []
+        for book in books:
+            total_quantity = sum(bl.quantity for bl in book.book_locations if bl.quantity is not None)
+
+            books_data.append({
+                "id": book.id,
+                "title": book.title,
+                "price": float(book.price),
+                "image_url": url_for('static', filename=book.image_url) if book.image_url else None,
+                "quantity": total_quantity,
+                "in_stock": total_quantity > 0
+            })
+
+        return jsonify({'success': True, 'books': books_data})
+
+    except Exception as e:
+        app.logger.error(f"Ошибка при фильтрации книг: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Ошибка при фильтрации книг'}), 500
 
 if __name__ == '__main__':
     with app.app_context():

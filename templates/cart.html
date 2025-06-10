@@ -51,7 +51,7 @@
                                 <span class="item-price">{{ item.price }} ₽</span>
                                 <div class="quantity-control">
                                     <button class="quantity-btn decrease" data-action="decrease">-</button>
-                                    <input type="number" class="quantity-input" id="quantity-{{ item.id }}" value="{{ item.quantity }}" readonly>
+                                    <input type="number" class="quantity-input" id="quantity-{{ item.id }}" value="{{ item.quantity }}" >
                                     <button class="quantity-btn increase" data-action="increase">+</button>
                                 </div>
                                 <span class="item-subtotal">{{ item.subtotal }} ₽</span>
@@ -174,12 +174,12 @@
                                 updateCartRow(bookId, response.quantity, price, response.quantity * price);
                             }
                         } else {
-                            showErrorModal(response.error || 'Не удалось обновить количество. Проверьте соединение.');
+                            showErrorModal(response.error || 'Нельзя добавить больше экземпляров, так как их больше нет в наличии.');
                         }
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         console.error('Ошибка AJAX:', textStatus, errorThrown);
-                        showErrorModal('Не удалось обновить количество. Проверьте соединение.');
+                        showErrorModal('Нельзя добавить больше экземпляров, так как их больше нет в наличии.');
                     });
             });
 

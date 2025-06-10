@@ -886,3 +886,298 @@ body {
     color: #212529;
 }
 
+/* Обновленные стили для фильтров */
+.sidebar {
+    flex: 1;
+    min-width: 300px;
+    position: absolute;
+    right: 50px;
+    top: 57px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(151, 71, 255, 0.1);
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #333;
+    margin: 0;
+}
+
+.clear-filters {
+    background: none;
+    border: none;
+    color: #9747FF;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.clear-filters:hover {
+    color: #7a39d5;
+    background: rgba(151, 71, 255, 0.1);
+}
+
+.filter-section {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1px solid rgba(151, 71, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.filter-section:hover {
+    border-color: rgba(151, 71, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(151, 71, 255, 0.1);
+}
+
+.filter-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    background: #FFFFFF;
+    transition: background 0.3s ease;
+}
+
+.filter-section h2:hover {
+    background: #FAF5FF;
+}
+
+.filter-section h2::after {
+    content: '+';
+    font-size: 18px;
+    color: #9747FF;
+    transition: transform 0.3s ease;
+}
+
+.filter-section.active h2::after {
+    content: '-';
+}
+
+.filter-section .filter-list {
+    list-style: none;
+    padding: 0 15px 15px;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.filter-section.active .filter-list {
+    max-height: 500px;
+    padding: 0 15px 15px;
+}
+
+.filter-list li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.filter-list label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.filter-list label:hover {
+    background: rgba(151, 71, 255, 0.05);
+    color: #333;
+}
+
+/* Современные кастомные чекбоксы */
+.filter-list input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.filter-list input[type="checkbox"]:checked {
+    background: #9747FF;
+    border-color: #9747FF;
+}
+
+.filter-list input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Стили для фильтра по цене */
+.price-section {
+    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1px solid rgba(151, 71, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.price-section:hover {
+    border-color: rgba(151, 71, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(151, 71, 255, 0.1);
+}
+
+.price-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    padding: 15px;
+    background: #FFFFFF;
+    transition: background 0.3s ease;
+}
+
+.price-section h2:hover {
+    background: #FAF5FF;
+}
+
+.price-slider {
+    position: relative;
+    width: 90%;
+    height: 40px;
+    margin: 10px auto;
+    padding: 0 15px 20px;
+}
+
+.price-slider .track {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.price-slider .range {
+    position: absolute;
+    height: 4px;
+    background: #9747FF;
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.price-slider .thumb {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #9747FF;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.price-slider .thumb:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.price-slider .thumb:active {
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.price-slider .labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #666;
+    margin-top: 15px;
+}
+
+.price-section .apply-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    background: #9747FF;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.price-section .apply-button:hover {
+    background: #7a39d5;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        min-width: 0;
+        margin-top: 20px;
+    }
+
+    .filter-section, .price-section {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-title {
+        font-size: 18px;
+    }
+
+    .filter-section h2 {
+        font-size: 15px;
+        padding: 12px 15px;
+    }
+
+    .filter-list label {
+        font-size: 13px;
+    }
+}
+
